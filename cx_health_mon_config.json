@@ -1,0 +1,52 @@
+{
+    "cx": {
+        "host": "http://localhost",
+        "username": "admin@cx",
+        "password": "xxxxx"
+    },
+    "monitor": {
+        "apiResponseTimeoutSeconds": 120,
+        "pollIntervalSeconds": 30,
+        "thresholds": {
+            "queuedScansThreshold": 5,
+            "queuedTimeThresholdMinutes": 20,
+            "scanDurationThresholdMarginPercent": 25.0,
+            "scanRateAsLOCPerHour": 150000,
+            "engineResponseThresholdSeconds": 60.0,
+            "restResponseThresholdSeconds": 60.0
+        },
+        "retries": 5
+    },
+    "alerts": {
+        "waitingPeriodBetweenAlertsMinutes": 15
+    },
+    "alertingSystems": {
+        "smtp": [
+            {
+                "systemType": "smtp",
+                "name": "Email",
+                "host": "smtp.mailserver.com",
+                "port": 587,
+                "user": "someuser@mailserver.com",
+                "password": "xxxxx",
+                "sender": "admin@mailserver.com",
+                "recipients": "list@of.com, email@addresses.com",
+                "subject": "Checkmarx Health Monitor Alert"
+            }
+        ],
+        "syslog": [
+            {
+                "systemType": "syslog",
+                "name": "Kiwi",
+                "host": "localhost",
+                "port": 514
+            },
+            {
+                "systemType": "syslog",
+                "name": "Splunk",
+                "host": "localhost",
+                "port": 515
+            }
+        ]
+    }
+}
