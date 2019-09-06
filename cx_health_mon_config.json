@@ -2,7 +2,12 @@
     "cx": {
         "host": "http://localhost",
         "username": "admin@cx",
-        "password": "xxxxx"
+        "password": "xxxx",
+        "db": {
+            "instance": "localhost\\SQLExpress",
+            "username": "",
+            "password": ""
+        }
     },
     "monitor": {
         "apiResponseTimeoutSeconds": 120,

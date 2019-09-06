@@ -4,7 +4,7 @@
     Gem Immauel (gem.immanuel@checkmarx.com)
     Checkmarx Professional Services
 
-    Usage: .\CxHealthMonitor.ps1 [-cxUser cxaccount] [-cxUser cxpassword]
+    Usage: .\CxHealthMonitor.ps1 [-cxUser cxaccount] [-cxPass cxpassword] [-dbUser dbaccount] [-dbPass dbpassword] 
 
     The command line parameters will override the values read from the 
     configuration file (cx_health_mon.config.json)
@@ -19,8 +19,25 @@ Param(
     [Parameter(Mandatory = $False)]
     [ValidateNotNullOrEmpty()]
     [String]
-    $cxPass = ""    
+    $cxPass = "",
+
+    [Parameter(Mandatory = $False)]
+    [ValidateNotNullOrEmpty()]
+    [String]
+    $dbUser = "",
+    
+    [Parameter(Mandatory = $False)]
+    [ValidateNotNullOrEmpty()]
+    [String]
+    $dbPass = ""    
 )
+
+# ----------------------- Module imports  ------------------------ #
+
+# This assumes that the SqlServer powershell module is already installed.
+# If not, run "Install-Module -Name Invoke-SqlCmd2" as an administrator prior to running this script.
+Import-Module "Invoke-SqlCmd2" -DisableNameChecking
+
 
 # CxSAST REST API auth values
 [String] $CX_REST_GRANT_TYPE = "password"
@@ -244,6 +261,7 @@ Enum AlertType {
     SLOW_ENGINE
     SLOW_PORTAL
     ENGINE_ERROR
+    AUDIT
 }
 
 # -----------------------------------------------------------------
@@ -695,6 +713,47 @@ Class RESTClient {
     }     
 }
 
+
+# -----------------------------------------------------------------
+# Database Client
+# -----------------------------------------------------------------
+Class DBClient {
+
+    hidden [IO] $io = [IO]::new()
+    hidden [PSCredential] $sqlAuthCreds
+    hidden [String] $serverInstance
+
+    # Constructs a DBClient based on given server and creds
+    DBClient ([String] $serverInstance, [String]$dbUser, [String] $dbPass) {
+        $this.serverInstance = $serverInstance
+        if ($dbUser -and $dbPass) {
+            $this.sqlAuthCreds = [CredentialsUtil]::new().GetPSCredential($dbUser, $dbPass)
+        }
+    }
+
+    # Executes given SQL using either SQLServer authentication or Windows, depending on given PSCredential object
+    [PSObject] ExecSQL ([String] $sql, [Hashtable] $parameters) {
+        # $this.io.Console("Executing $sql")
+        try {
+            if ($this.sqlAuthCreds.UserName) {
+                $cred = $this.sqlAuthCreds
+                return Invoke-Sqlcmd2 -ServerInstance $this.serverInstance -Credential @cred -Query $sql -SqlParameters $parameters
+            }
+            else {
+                return Invoke-Sqlcmd2 -ServerInstance $this.serverInstance -Query $sql -SqlParameters $parameters
+            }    
+        }
+        catch {
+            $this.io.Log("Database execution error. $($_.Exception.GetType().FullName), $($_.Exception.Message)")
+            # Force exit during dev run - runtime savior
+            Exit
+        }
+    }
+
+}
+
+
+
 # -----------------------------------------------------------------
 # Engine(s) Monitor
 # -----------------------------------------------------------------
@@ -794,6 +853,184 @@ Class EngineMonitor {
     }
 }
 
+
+# -----------------------------------------------------------------
+# Database table metadata 
+#
+# The AuditMonitor executes SQL based on metadata of 
+# the database item that needs to be audited/monitored,
+# to generate the alert message. 
+#
+# The DBQueryMetadata contains the SQL query to execute, and 
+# a map of [reportable Labels to DB Columns].
+# Example: ["User that changed the value" : "updating_user"] 
+# -----------------------------------------------------------------
+Class DBQueryMetadata {   
+    [String] $name
+    [String] $sql
+    # Notice the hashtable is ordered.
+    # This enables control over the order of the labels
+    # when we auto-generate the alert message.
+    # See AuditMonitor's PopulateAuditMetadata() method
+    # for the order of the labels.
+    $meta = [ordered] @{ }
+}
+
+
+
+# -----------------------------------------------------------------
+# Audit(s) Monitor
+# -----------------------------------------------------------------
+Class AuditMonitor {
+
+    hidden [IO] $io
+    hidden [AlertService] $alertService
+    hidden [DateTime] $lastRun
+    hidden [DBClient] $dbClient
+    hidden [System.Collections.ArrayList] $dbQueryMetadata = @() 
+
+    # Constructs an AuditMonitor
+    AuditMonitor ([AlertService] $alertService) {
+        $this.io = [IO]::new()
+        $this.alertService = $alertService
+        $this.lastRun = Get-Date
+        $this.PopulateAuditMetadata()
+    }
+
+    # Inject suitable DB client
+    SetDbClient ([DBClient] $dbClient) {
+        $this.dbClient = $dbClient
+    }
+
+    # Add metadata for database queries
+    AddDBQueryMetadata ([DBQueryMetadata] $metadata) {
+        $this.dbQueryMetadata.Add($metadata)
+    }
+
+    # Monitor for changes in audit tables
+    Monitor() {
+
+        # Big picture:
+        # For each database item that needs to be monitored,
+        #   we run the specified SQL query
+        #   and extract the columns specified in the meta map
+        #   and generate an alert message string that is published to the alerting service
+        foreach ($metadata in $this.dbQueryMetadata) {
+
+            # All the queries depend on a timestamp column.
+            # We only process new database entries since the last time the monitor was run.
+            # Ex. We only process/send alerts for new preset changes (since the last run).
+            [Hashtable] $parameters = @{ lastRun = $this.lastRun }
+            
+            [PSObject] $results = $this.dbClient.ExecSQL($metadata.sql, $parameters)
+            
+            if ($results) {
+            
+                foreach ($result in $results) {     
+
+                    # Start constructing the alert message
+                    [String] $message = "[$($metadata.name)] : "
+                    
+                    # Extract the columns that are specified in the meta map
+                    [int] $i = 0
+                    foreach ($key in $metadata.meta.Keys) {
+
+                        $columnName = $metadata.meta[$key]
+                        $value = $result[$columnName]
+                        $message += "$key = [$value] "
+                        
+                        # Append a comma if it's not the last item
+                        if ($i + 1 -lt $metadata.meta.Keys.Count) {
+                            $message += ", "
+                            $i++
+                        }
+                    }
+                    # Provide new guid to uniquely identify each audit alert
+                    # Otherwise the alerting service will assume it is the same alert and may not send it
+                    $this.alertService.AddAlert([AlertType]::AUDIT, $message, [Guid]::NewGuid())               
+                }
+                # Send out the alert messages
+                $this.alertService.Send()
+            }
+        }
+        # Update the last run marker
+        $this.lastRun = Get-Date
+    }
+
+    # Create database query metadata for the items that need to be monitored
+    # and add them to the monitor
+    PopulateAuditMetadata() {
+        
+        # Too bad we don't have a REST API to get these audit entries :(
+
+        # Audit_Projects
+        [DBQueryMetadata] $auditProject = [DBQueryMetadata]::new()
+        $auditProject.name = "Project"
+        $auditProject.sql = "select * from CxActivity.dbo.Audit_Projects where [TimeStamp] >= @lastRun"
+        $auditProject.meta["Action"] = "Event"
+        $auditProject.meta["Name"] = "ProjectName"
+        $auditProject.meta["User"] = "OwnerName"
+        $auditProject.meta["Timestamp"] = "TimeStamp"
+        $this.AddDBQueryMetadata($auditProject)
+
+        # Audit_Presets
+        [DBQueryMetadata] $auditPresets = [DBQueryMetadata]::new()
+        $auditPresets.name = "Preset"
+        $auditPresets.sql = "select * from CxActivity.dbo.Audit_Presets where [TimeStamp] >= @lastRun"
+        $auditPresets.meta["Action"] = "Event"
+        $auditPresets.meta["Name"] = "PresetName"
+        $auditPresets.meta["User"] = "OwnerName"
+        $auditPresets.meta["Timestamp"] = "TimeStamp"
+        $this.AddDBQueryMetadata($auditPresets)
+
+        # Audit_Queries
+        [DBQueryMetadata] $auditQueries = [DBQueryMetadata]::new()
+        $auditQueries.name = "Query"
+        $auditQueries.sql = "select * from CxActivity.dbo.Audit_Queries where [TimeStamp] >= @lastRun"
+        $auditQueries.meta["Action"] = "Event"
+        $auditQueries.meta["Name"] = "Name"
+        $auditQueries.meta["User"] = "OwnerName"
+        $auditQueries.meta["Timestamp"] = "TimeStamp"
+        $this.AddDBQueryMetadata($auditQueries)
+
+        # Audit Results
+        [DBQueryMetadata] $auditResults = [DBQueryMetadata]::new()
+        $auditResults.name = "Results"
+        # Modifed version of the CxDB.dbo.[GetAllLabelsForScanByProject] stored procedure
+        $auditResults.sql = 
+        "SELECT DISTINCT 
+        labels.[StringData] AS Action,
+        labels.[UpdateDate] AS [Timestamp],
+        labels.[UpdatingUser] AS Username, 
+        projects.[Name] AS ProjectName, 
+        queryVersion.[Name] As QueryName,
+        nodeResults.File_Name AS [File], 
+        nodeResults.Line, 
+        nodeResults.Col	AS [Column]
+        FROM 
+        CxDB.dbo.ResultsLabels labels
+        INNER JOIN CxDB.dbo.Projects projects ON labels.[ProjectId] = projects.[Id]
+        INNER JOIN CxDB.dbo.PathResults scanPaths ON scanPaths.[Similarity_Hash] = labels.[SimilarityId]
+        INNER JOIN CxDB.dbo.QueryVersion queryVersion ON scanPaths.QueryVersionCode = queryVersion.QueryVersionCode
+        INNER JOIN CxDB.dbo.NodeResults nodeResults ON nodeResults.[ResultId] = labels.[ResultId] AND nodeResults.Path_Id = labels.PathID AND nodeResults.Node_Id = 1
+        LEFT JOIN (
+            SELECT QueryVersion.QueryVersionCode FROM CxDB.dbo.QueryVersion INNER JOIN CxDB.dbo.QueryGroup ON QueryVersion.PackageId  = QueryGroup.PackageId) QueryIDs2 
+        ON  QueryIDs2.QueryVersionCode = scanPaths.QueryVersionCode
+        WHERE labels.LabelType=1 and labels.UpdateDate >= @lastRun"
+
+        $auditResults.meta.Add("Action", "Action")
+        $auditResults.meta.Add("Query", "QueryName")
+        $auditResults.meta.Add("Project", "ProjectName")
+        $auditResults.meta.Add("File", "File")
+        $auditResults.meta.Add("Line", "Line")
+        $auditResults.meta.Add("Column", "Column")
+        $auditResults.meta.Add("User", "Username")
+        $auditResults.meta.Add("Timestamp", "Timestamp")
+        $this.AddDBQueryMetadata($auditResults)        
+    }
+}
+
+
 # -----------------------------------------------------------------
 # Queue Monitor
 # -----------------------------------------------------------------
@@ -844,21 +1081,39 @@ Class QueueMonitor {
         $this.cxSastRestClient.login($script:config.cx.username, $script:config.cx.password)
 
         # Fetch Queue Status
-        $stopwatch = [system.diagnostics.stopwatch]::StartNew()
         $qStatusResp = $this.GetQueueStatus()
+        
+        # Process the response
+        $this.ProcessResponse($qStatusResp)
+
+        # Check Portal responsiveness
+        $this.CheckPortalResponsiveness()
+        
+    }
+
+    # Check for Portal responsiveness
+    CheckPortalResponsiveness() {
+        # Check portal responsiveness
+        $stopwatch = [system.diagnostics.stopwatch]::StartNew()
+        $response = $this.GetLoginPage()
         $stopwatch.Stop()
 
-        $this.io.Log("Portal is responsive. Get Queue Information responded in [$($stopwatch.elapsed.TotalSeconds)] seconds.")
-
-        # TODO: Assumption is that this is a good proxy for Portal responsiveness
+        # TODO: Watch out for the condition where the Invoke-WebRequest -TimeoutSec is smaller than the restResponseThresholdSeconds threshold
+        if ($response) {
+            if ($response.StatusCode -eq 200) {
+                $this.io.Log("Portal is responsive. Portal responded in [$($stopwatch.elapsed.TotalSeconds)] seconds.")
+            }
+            else {
+                $this.io.LogEvent("Portal responded with HTTP [$($response.StatusCode)]")
+            }
+        }
+        
+        # Check if the portal response exceeded threshold
         if ($stopwatch.elapsed.TotalSeconds -gt $script:config.monitor.thresholds.restResponseThresholdSeconds) {
             $message = "Slow Portal response. Response Time: [$($stopWatch.elapsed.TotalSeconds)] seconds. Threshold: [$($script:config.monitor.thresholds.restResponseThresholdSeconds)] seconds."
             $this.io.LogEvent($message)
             $this.alertService.AddAlert([AlertType]::SLOW_PORTAL, $message, "")
         }
-
-        # Process the response
-        $this.ProcessResponse($qStatusResp)
     }
 
     # Fetches the status of jobs in the CxSAST scan queue
@@ -866,6 +1121,21 @@ Class QueueMonitor {
         [String] $apiUrl = "/sast/scansQueue"
         return $this.cxSastRestClient.invokeAPI($apiUrl, [RESTMethod]::GET, $null, $script:config.monitor.apiResponseTimeoutSeconds)
     }
+
+    # Try to fetch the portal login /CxWebClient/Login.aspx page
+    # proxy for portal performance
+    [Object] GetLoginPage () { 
+        [Object] $resp = $null
+        [String] $pageUrl = $script:config.cx.host + "/CxWebClient/Login.aspx"
+        try {     
+            $resp = Invoke-WebRequest -Uri $pageUrl -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+        }
+        catch {
+            $resp = $_.Exception.Response
+            $this.io.Log("ERROR: [$($_.Exception.Message)]")
+        }
+        return $resp
+    }    
 
     # Processes response from CxSAST Queue Status REST API call
     ProcessResponse ([Object] $apiResp) {
@@ -1034,6 +1304,8 @@ if ($psv -and $psv -lt 5) {
 # Override if values were explicitly overridden via the commandline
 if ($cxUser) { $config.cx.username = $cxUser }
 if ($cxPass) { $config.cx.password = $cxPass }
+if ($dbUser) { $config.cx.db.username = $dbUser }
+if ($dbPass) { $config.cx.db.password = $dbPass }
 
 
 # Create an IO utility object
@@ -1051,6 +1323,14 @@ $io = [IO]::new()
 # Create Engine(s) monitor
 [EngineMonitor] $engineMonitor = [EngineMonitor]::new($alertService)
 
+# Create a DB Client
+[DBClient] $dbClient = [DBClient]::new($config.cx.db.instance, $config.cx.db.username, $config.cx.db.password)
+
+# Create Audit(s) monitor
+[AuditMonitor] $auditMonitor = [AuditMonitor]::new($alertService)
+# Inject a DB Client
+$auditMonitor.SetDbClient($dbClient)
+
 # Spit out pretty headers
 $io.WriteHeader()
 
@@ -1066,6 +1346,9 @@ while ($True) {
 
     # Check the engine(s)
     $engineMonitor.Monitor()
+
+    # Poll Audit DBs
+    $auditMonitor.Monitor()
 
     # Wait a bit before polling again
     Start-Sleep -Seconds $script:config.monitor.pollIntervalSeconds
