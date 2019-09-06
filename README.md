@@ -12,6 +12,11 @@ The Checkmarx Health Monitor is a tool that monitors the following:
     * Offline
 * Portal
     * Responsiveness
+* Audits
+    * Project changes
+    * Query changes
+    * Preset changes
+    * Results Severity, State, Assignment changes
 
 ## Getting Started
 
@@ -23,16 +28,19 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 ### Prerequisites
 
 * Powershell V5
-* Access to the Checkmarx Server
+* Invoke-SqlCmd2 module
+* Access to the Checkmarx Server and Database
 
 
 ## Usage
 
 ```
-.\CxHealthMonitor.ps1 [-cxUser username] [-cxPass password]
+.\CxHealthMonitor.ps1 [-cxUser username] [-cxPass password] [-dbUser username] [-dbPass password]
 ```
 
 The optional arguments will override the corresponding values provided in the configuration file. 
+
+Note: If the optional db parameters are skipped and the corresponding entries in the config file are empty, the monitor will use SQLServer authentication.
 
 ## Configuration
 
@@ -42,12 +50,17 @@ The configuration file (cx_health_mon_config.json) consists of the following sec
 * alerts
 * alertingSystems
 
-The **"cx"** section drives connectivity to the Checkmarx servers. The Checkmarx Server URL as well as connection credentials are configured here.
+The **"cx"** section drives connectivity to the Checkmarx server and database. The Checkmarx Server URL, Checkmarx manager connection credentials, database instance and database connection credentials are configured here.
 ```json
 "cx": {
         "host": "http://checkmarx.domain.com",
         "username": "your_account",
-        "password": "your_password"
+        "password": "your_password",
+        "db": {
+            "instance": "localhost\\SQLExpress",
+            "username": "",
+            "password": ""
+        }
     }
 ```
 
