@@ -27,8 +27,10 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 
 ### Prerequisites
 
-* Powershell V5
+* Powershell V5 (Windows 10 has powershell 5.1 installed)
+   * https://docs.microsoft.com/en-us/powershell/scripting/install/installing-windows-powershell?view=powershell-6
 * Invoke-SqlCmd2 module
+   * Run : Install-Module -Name Invoke-SqlCmd2
 * Access to the Checkmarx Server and Database
 
 
