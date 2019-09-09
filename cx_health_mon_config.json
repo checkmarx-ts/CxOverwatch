@@ -53,5 +53,8 @@
                 "port": 515
             }
         ]
+    },
+    "log": {
+        "jsonDirectory": "json"
     }
 }
