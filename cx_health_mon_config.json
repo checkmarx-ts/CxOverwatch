@@ -10,6 +10,7 @@
         }
     },
     "monitor": {
+        "useUTCTimeOnClient": "false",
         "apiResponseTimeoutSeconds": 120,
         "pollIntervalSeconds": 30,
         "thresholds": {

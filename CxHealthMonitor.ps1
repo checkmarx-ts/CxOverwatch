@@ -561,6 +561,9 @@ Class ScanTimeAlgo {
             $startTime = [Xml.XmlConvert]::ToDateTime($scanStart)
             if (!$scanEnd) {
                 $scanEnd = Get-Date
+                if ($script:config.monitor.useUTCTimeOnClient -eq "true") {
+                    $scanEnd = (Get-Date).ToUniversalTime()
+                }
             }
             $diff = New-TimeSpan -Start $startTime -End $scanEnd
             $elapsedTime = $diff.TotalMinutes            
