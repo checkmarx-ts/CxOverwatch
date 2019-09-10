@@ -137,7 +137,15 @@ The monitor ships with multiple Alerting System implementations, such as Email(s
     }
 ```
 
+The **"log"** section is used to configure the JSON output directory to be used by the monitor.
+The _jsonDirectory_ element specifies where the JSON files output by the monitor should be written.
 
+```json
+    "log": {
+        "jsonDirectory": "json"
+    }
+```    
+    
 ## Authors
 
 * Gem Immanuel, Checkmarx Professional Services - *Initial work*
