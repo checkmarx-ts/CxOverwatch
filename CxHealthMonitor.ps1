@@ -250,9 +250,10 @@ Class EmailAlertSystem : AlertSystem {
     hidden [String] $subject
     hidden [String] $smtpSender
     hidden [String[]] $recipients
+    hidden [Boolean] $useSsl
 
     # Constructs the email alert system object
-    EmailAlertSystem ([String] $systemType, [String] $name, [String] $smtpHost, [int] $smtpPort, [String] $smtpUsername, [String] $smtpPassword, [String] $smtpSender, [String[]] $recipients, [String] $subject) {
+    EmailAlertSystem ([String] $systemType, [String] $name, [String] $smtpHost, [int] $smtpPort, [String] $smtpUsername, [String] $smtpPassword, [String] $smtpSender, [String[]] $recipients, [String] $subject, [Boolean] $useSsl) {
         $this.io = [IO]::new()
         $this.systemType = $systemType
         $this.name = $name
@@ -261,9 +262,13 @@ Class EmailAlertSystem : AlertSystem {
         $this.smtpSender = $smtpSender
         $this.recipients = $recipients
         $this.subject = $subject
-        [CredentialsUtil] $credUtil = [CredentialsUtil]::new()
-        $this.smtpCredentials = $credUtil.GetPSCredential($smtpUsername, $smtpPassword)
-
+        $this.useSsl = $useSsl
+        
+        # Support anonymous authenticated smtp scenario
+        if ($smtpUsername.Length -gt 0 -and $smtpPassword.Length -gt 0) {
+            [CredentialsUtil] $credUtil = [CredentialsUtil]::new()
+            $this.smtpCredentials = $credUtil.GetPSCredential($smtpUsername, $smtpPassword)
+        }
     }
 
     # Override default behavior
@@ -278,7 +283,27 @@ Class EmailAlertSystem : AlertSystem {
         # No-frills implementation
         try {
             $this.io.Log("Sending email alert to [$($this.name) : $($this.recipients)]")
-            Send-MailMessage -From $this.smtpSender -Body $message -Subject $this.subject -To $this.recipients -Priority High -SmtpServer $this.smtpHost -Port $this.smtpPort -UseSsl -Credential $this.smtpCredentials                             
+            
+            $mailargs = @{
+                From = $this.smtpSender
+                Body = $message
+                Subject = $this.subject
+                To = $this.recipients
+                Priority = "High"
+                SmtpServer = $this.smtpHost
+                Port = $this.smtpPort
+            }
+            
+            # If credentials are not provided then we will use anonymous smtp
+            if ($this.smtpCredentials) {
+                $mailargs.Add("Credential", $this.smtpCredentials)
+            }
+            
+            if ($this.useSsl) {
+                $mailargs.Add("UseSsl", $True)
+            }
+                        
+            Send-MailMessage @mailargs                        
         }
         catch {
             $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send email alert. Verify email configuration.")
@@ -336,7 +361,7 @@ Class AlertService {
             # Register SMTP systems, if configured
             if ($alertingSystem.smtp) {
                 foreach ($smtpSystem in $alertingSystem.smtp) {
-                    [AlertSystem] $emailAlertSystem = [EmailAlertSystem]::new($smtpSystem.systemType, $smtpSystem.name, $smtpSystem.host, $smtpSystem.port, $smtpSystem.user, $smtpSystem.password, $smtpSystem.sender, $smtpSystem.recipients, $smtpSystem.subject)    
+                    [AlertSystem] $emailAlertSystem = [EmailAlertSystem]::new($smtpSystem.systemType, $smtpSystem.name, $smtpSystem.host, $smtpSystem.port, $smtpSystem.user, $smtpSystem.password, $smtpSystem.sender, $smtpSystem.recipients, $smtpSystem.subject, $smtpSystem.useSsl)    
                     $this.AddAlertSystem($emailAlertSystem);
                 }
             }

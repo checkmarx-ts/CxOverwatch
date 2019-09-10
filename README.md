@@ -105,6 +105,10 @@ The **"alerts"** section is used to configure values specific to Alerts.
 The **"alertingSystems"** section is used to configure available Alerting Systems to be used by the monitor.
 The monitor ships with multiple Alerting System implementations, such as Email(smtp), Syslog and Event Logs. When new implementations (such as SNMP etc.) are available, this is where they should be configured.
 
+Leave smtp user and password blank for anonymous smtp.
+
+
+
 ```json
 "alertingSystems": {
         "smtp": [
@@ -117,7 +121,8 @@ The monitor ships with multiple Alerting System implementations, such as Email(s
                 "password": "somepassword",
                 "sender": "admin@myemailserver.com",
                 "recipients": "list@of.com, email@addresses.com",
-                "subject": "Checkmarx Health Monitor Alert"
+                "subject": "Checkmarx Health Monitor Alert",
+                "useSsl": true
             }
         ],
         "syslog": [
@@ -149,6 +154,7 @@ The _jsonDirectory_ element specifies where the JSON files output by the monitor
 ## Authors
 
 * Gem Immanuel, Checkmarx Professional Services - *Initial work*
+* Benjamin Stokes, Checkmarx Professional Services - patches
 
 
 ## License
