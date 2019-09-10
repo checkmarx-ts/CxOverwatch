@@ -59,10 +59,11 @@ Class IO {
     static [String] $LOG_FILE = "cx_health_mon.log"
     # Event logging
     static [String] $EVENT_FILE = "cx_health_mon_events.log"
+    hidden [DateTimeUtil] $dateUtil = [DateTimeUtil]::new()
 
     
     # Files for JSON output 
-    static [String] $TIMESTAMP_FORMAT = "yyyyMMdd_hhMMss"
+    static [String] $FILE_SUFFIX_TIMESTAMP_FORMAT = "yyyyMMdd_hhmmssfff"
     
     # Logs given message to configured log file
     Log ([String] $message) {
@@ -86,17 +87,28 @@ Class IO {
     }
 
     # Write to JSON file
-    WriteJSON([AlertType] $jsonFile, [PsObject] $object) {
+    WriteJSON([AlertType] $jsonFile, [PSCustomObject] $object) {
+        
+        # Ensure folder exists
         [String] $jsonOutDir = $script:config.log.jsonDirectory
         If (!(Test-Path $jsonOutDir)) {
             New-Item -ItemType Directory -Force -Path $jsonOutDir
         }
         $jsonOutDir = (Get-Item -Path $jsonOutDir).FullName
-        [String] $timestamp = (Get-Date).ToString([IO]::TIMESTAMP_FORMAT)
-        [String] $fileName = $jsonFile.ToString().ToLower() + "_$timestamp.json"
+
+        # Create timestamp 
+        [DateTime] $timestamp = $this.dateUtil.NowUTC()
+        [String] $fileSuffix = $timestamp.ToString([IO]::FILE_SUFFIX_TIMESTAMP_FORMAT)
+
+        # Update JSON blob with timestamp
+        $object.EventDate = $this.dateUtil.Format($timestamp)
+
+        # Create file name
+        [String] $fileName = $jsonFile.ToString().ToLower() + "_$fileSuffix.json"
         [String] $jsonFilePath = Join-Path -Path "$jsonOutDir" -ChildPath $fileName
-        $jsonContent = $object | ConvertTo-Json
-        Add-content $jsonFilePath -Value $jsonContent
+
+        # Write to file
+        Add-content $jsonFilePath -Value ($object | ConvertTo-Json)
     }
 
     # Write a pretty header output
@@ -122,8 +134,7 @@ Class IO {
     }
 
     hidden [String] AddTimestamp ([String] $message) {
-        filter timestamp { "$(Get-Date -Format G): $_" }
-        return $message | timestamp
+        return $this.dateUtil.NowUTCFormatted() + ": " + $message
     }
 }
 
@@ -135,6 +146,7 @@ Class AlertSystem {
     [String] $name = "Unknown Name. Alert System Name not explicitly set."
     [String] $systemType = "Unknown system type. Alert System Type not explicitly set."
     [IO] $io = [IO]::new()
+    [DateTimeUtil] $dateUtil = [DateTimeUtil]::new()
 
     # Abstract constructor
     AlertSystem () {
@@ -183,7 +195,7 @@ Class SyslogAlertSystem : AlertSystem {
 
     hidden [String] $syslogServer
     hidden [int] $syslogPort
-    hidden [SyslogSeverity] $severity = [SyslogSeverity]::ALERT
+    hidden [SyslogSeverity] $severity = [SyslogSeverity]::ALERT    
 
     # Constructs a syslog alerting system object
     SyslogAlertSystem([String] $systemType, [String] $name, [String] $syslogServer, [int] $syslogPort) {  
@@ -208,7 +220,7 @@ Class SyslogAlertSystem : AlertSystem {
         # Calculate the priority        
         [int] $priority = ([int] $facility * 8) + [int] $this.severity.value__
         # "MMM dd HH:mm:ss" or "yyyy:MM:dd:-HH:mm:ss zzz"
-        [String] $timestamp = Get-Date -Format "MMM dd HH:mm:ss"
+        [String] $timestamp = ($this.dateUtil.NowUTC()).ToString("MMM dd HH:mm:ss")
 
         # Syslog packet format
         [String] $syslogMessage = "<{0}>{1} {2} {3}" -f $priority, $timestamp, $hostname, $message
@@ -429,6 +441,33 @@ Class CredentialsUtil {
         [SecureString] $secPassword = ConvertTo-SecureString $plainTextPassword -AsPlainText -Force
         return New-Object System.Management.Automation.PSCredential ($username, $secPassword)
     }
+}
+
+# -----------------------------------------------------------------
+# DateTime Utility
+# -----------------------------------------------------------------
+Class DateTimeUtil {
+
+    # Gets timestamp in UTC in configured format
+    [String] NowUTCFormatted() {
+        return $this.Format($this.NowUTC())
+    }
+
+    # Gets timestamp in UTC
+    [DateTime] NowUTC() {
+        return (Get-Date).ToUniversalTime()
+    }
+
+    # Converts to UTC and formats
+    [String] ToUTCAndFormat([DateTime] $dateTime) {
+        return $this.Format($dateTime.ToUniversalTime())
+    }
+
+    # Formats time based on configured format
+    [String] Format([DateTime] $dateTime) {
+        return $dateTime.ToString($script:config.monitor.timeFormat)
+    }
+
 }
 
 # -----------------------------------------------------------------
@@ -797,10 +836,12 @@ Class EngineMonitor {
     hidden [IO] $io
     hidden [AlertService] $alertService
     hidden [RESTClient] $cxSastRestClient
+    hidden [DateTimeUtil] $dateUtil
     
     # Constructs a EngineMonitor
     EngineMonitor ([AlertService] $alertService) {
         $this.io = [IO]::new()
+        $this.dateUtil = [DateTimeUtil]::new()
         $this.alertService = $alertService
     }
 
@@ -851,21 +892,16 @@ Class EngineMonitor {
         # If there are registered engines
         if ($apiResp.Count -gt 0) {
 
-            [System.Collections.ArrayList] $slowEngines = @()
-            [System.Collections.ArrayList] $idleEngines = @()
-            [System.Collections.ArrayList] $offlineEngines = @()
-            
             foreach ($engine in $apiResp) {
                 
                 [String] $engineInfo = "Engine [$($engine.id), $($engine.name), $($engine.status.value)]"
                 
-                [Hashtable] $engineDetails = $this.GetEngineDetails($engine)
+                [PSCustomObject] $engineDetails = $this.GetEngineDetails($engine)
 
                 # Try connecting if not offline
                 if ($engine.status.value -eq "Offline") {
                     $this.alertService.AddAlert([AlertType]::ENGINE_OFFLINE, $engineInfo, $engineInfo)
-                    # Add to offline engines
-                    $offlineEngines.Add($engineDetails)                    
+                    $this.io.WriteJSON([AlertType]::ENGINE_OFFLINE, $engineDetails)
                 }
                 else {
                     # Attempt to access the Engine's WSDL and report response time
@@ -885,84 +921,73 @@ Class EngineMonitor {
                     # Check if engine is idle
                     if ($engine.status.value -eq "Idle") {
 
-                        # Add to idle engines
-                        $idleEngines.Add($engineDetails)
+                        # Write idle engines JSON
+                        $this.io.WriteJSON([AlertType]::ENGINE_IDLE, $engineDetails)
 
-                        # Check if there are idle engines that could have executed one of the queued scans
-                        if ($script:queuedEntriesDto) {
-
-                            # For every idle engine,
-                            foreach ($idleEngine in $idleEngines) {         
-
-                                [System.Collections.ArrayList] $matchedScans = @()
-
-                                # attempt to find scans that could 'fit'
-                                foreach ($queuedScan in $script:queuedEntriesDto) {                            
-                                
-                                    # Applies only to 'Queued' scans - not to ones that are in SourcePulling etc.
-                                    if ($queuedScan.stage.value -eq "Queued") {
-                                
-                                        # IdleEngineMinLOC <= QueuedScanLOC <= IdleEngineMaxLOC
-                                        if ($idleEngine.ScanMinLoc -le $queuedScan.loc -and $queuedScan.loc -le $idleEngine.ScanMaxLoc) {
-                                            # This algo is very eager,
-                                            # in that the engine could have just published 'idle' and we pick it up :)
-                                            $matchedScans.Add($queuedScan)
-                                        }
-                                    }
-                                }
-
-                                # Publish alert only if we found scans within an idle engine's parameters
-                                # TODO: we're not looking at the concurrent capacity of the engine
-                                if ($matchedScans.Count -gt 0) {
-                                    [String] $message = "Idle engine [" + $idleEngine.name + "]. Potential scans: [" + $matchedScans.id + "]";
-                                    $this.alertService.AddAlert([AlertType]::ENGINE_IDLE, $message, $engineInfo)
-                                }
-                            }
-                        }
+                        # Check if this idle engine could have taken on existing queued scans
+                        $this.CheckQueuedScansForMatch($engine)
                     }
 
                     # Check API call elapsed time
+                    [TimeSpan] $threshold = [TimeSpan]::FromSeconds($script:config.monitor.thresholds.engineResponseThresholdSeconds)
                     if ($stopwatch.elapsed.TotalSeconds -gt $script:config.monitor.thresholds.engineResponseThresholdSeconds) {
-                        $message = $engineInfo + " Response Time: [$($stopWatch.elapsed.TotalSeconds)] seconds. Threshold: [$($script:config.monitor.thresholds.engineResponseThresholdSeconds)] seconds."
+                        $message = $engineInfo + " Response Time: [$($stopWatch.elapsed)]. Threshold: [$threshold]."
                         $this.io.LogEvent($message)
                         $this.alertService.AddAlert([AlertType]::ENGINE_RESPONSE_SLOW, $message, $engineInfo) 
 
                         # Create a JSON structure for the slow engine
                         $engineDetails.Add("ResponseTime", "$($stopwatch.elapsed.Milliseconds)")
-                        $engineDetails.Add("Threshold", "$($script:config.monitor.thresholds.engineResponseThresholdSeconds) * 1000")
-                        $slowEngines.Add($engineDetails)
+                        $engineDetails.Add("Threshold", "$($script:config.monitor.thresholds.engineResponseThresholdSeconds * 1000)")
+                        $this.io.WriteJSON([AlertType]::ENGINE_RESPONSE_SLOW, $engineDetails)
                     }                    
                 }
             }
         
-            # Write out JSON blob for slow engines
-            if ($slowEngines.Count -gt 0) {
-                $this.io.WriteJSON([AlertType]::ENGINE_RESPONSE_SLOW, $slowEngines)
-            }
-
-            # Write out JSON blob for offline engines
-            if ($offlineEngines.Count -gt 0) {
-                $this.io.WriteJSON([AlertType]::ENGINE_OFFLINE, $offlineEngines)
-            }
-
-            # Write out JSON blob for idle engines
-            if ($idleEngines.Count -gt 0) {
-                $this.io.WriteJSON([AlertType]::ENGINE_IDLE, $idleEngines)
-            }
-
             # Send out alerts
             $this.alertService.Send()
         }
 
     }
 
+    # Checks queued scans against given idle engine to see if it 'fits'
+    CheckQueuedScansForMatch ([PSObject] $engine) {
+
+        # Check if there are idle engines that could have executed one of the queued scans
+        if ($script:queuedEntriesDto) {
+
+            [System.Collections.ArrayList] $matchedScans = @()
+
+            # attempt to find scans that could 'fit'
+            foreach ($queuedScan in $script:queuedEntriesDto) {                            
+                                
+                # Applies only to 'Queued' scans - not to ones that are in SourcePulling etc.
+                if ($queuedScan.stage.value -eq "Queued") {
+                                
+                    # IdleEngineMinLOC <= QueuedScanLOC <= IdleEngineMaxLOC
+                    if ($engine.ScanMinLoc -le $queuedScan.loc -and $queuedScan.loc -le $engine.ScanMaxLoc) {
+                        # This algo is very eager,
+                        # in that the engine could have just published 'idle' and we pick it up :)
+                        $matchedScans.Add($queuedScan)
+                    }
+                }
+            }
+
+            # Publish alert only if we found scans within an idle engine's parameters
+            # NOTE: TODO: we're not looking at the concurrent capacity of the engine
+            if ($matchedScans.Count -gt 0) {
+                [String] $engineInfo = "Engine [$($engine.id), $($engine.name), $($engine.status.value)]"
+                [String] $message = "Idle engine [" + $engine.name + "]. Potential scans: [" + $matchedScans.id + "]";
+                $this.alertService.AddAlert([AlertType]::ENGINE_IDLE, $message, $engineInfo)
+            }
+        }
+    }
+
     # Maps engine details into a Hashtable
-    [Hashtable] GetEngineDetails ($engine) {
+    [PSCustomObject] GetEngineDetails ($engine) {
         return [ordered] @{
+            EventDate          = ""
             EngineId           = "$($engine.id)"
             EngineServerName   = "$($engine.name)"
-            # TODO: StartDate NOT available in REST API
-            # StartDate        = "$($engine.)"
             ScanMinLoc         = "$($engine.minLoc)"
             ScanMaxLoc         = "$($engine.maxLoc)"
             MaxConcurrentScans = "$($engine.maxScans)"
@@ -1008,10 +1033,12 @@ Class AuditMonitor {
     hidden [DateTime] $lastRun
     hidden [DBClient] $dbClient
     hidden [System.Collections.ArrayList] $dbQueryMetadata = @() 
+    hidden [DateTimeUtil] $dateUtil
 
     # Constructs an AuditMonitor
     AuditMonitor ([AlertService] $alertService) {
         $this.io = [IO]::new()
+        $this.dateUtil = [DateTimeUtil]::new()
         $this.alertService = $alertService
         $this.lastRun = Get-Date
         $this.PopulateAuditMetadata()
@@ -1165,6 +1192,7 @@ Class QueueMonitor {
     hidden [ScanTimeAlgo] $scanTimeAlgo
     hidden [AlertService] $alertService
     hidden [RESTClient] $cxSastRestClient
+    hidden [DateTimeUtil] $dateUtil
     
     # CxSAST 8.9 Scan Stages
     # New, PreScan, Queued, Scanning, PostScan, Finished, Canceled, Failed, SourcePullingAndDeployment, None
@@ -1184,6 +1212,7 @@ Class QueueMonitor {
     # Constructs a QueueMonitor
     QueueMonitor ([ScanTimeAlgo] $scanTimeAlgo, [AlertService] $alertService) {
         $this.io = [IO]::new()
+        $this.dateUtil = [DateTimeUtil]::new()
         $this.queuedScansThreshold = $script:config.monitor.thresholds.queuedScansThreshold
         $this.queuedTimeThreshold = [TimeSpan]::FromMinutes($script:config.monitor.thresholds.queuedTimeThresholdMinutes)
         $this.scanTimeAlgo = $scanTimeAlgo
@@ -1220,7 +1249,7 @@ Class QueueMonitor {
         $response = $this.GetLoginPage()
         $stopwatch.Stop()
 
-        # TODO: Watch out for the condition where the Invoke-WebRequest -TimeoutSec is smaller than the restResponseThresholdSeconds threshold
+        # NOTE: Watch out for the condition where the Invoke-WebRequest -TimeoutSec is smaller than the restResponseThresholdSeconds threshold
         if ($response) {
             if ($response.StatusCode -eq 200) {
                 $this.io.Log("Portal is responsive. Portal responded in [$($stopwatch.elapsed.TotalSeconds)] seconds.")
@@ -1316,8 +1345,7 @@ Class QueueMonitor {
         }
 
         # JSON structures for queue monitor
-        [Hashtable] $queueScanExcess = $null
-        [System.Collections.ArrayList] $queueTimeExceeded = @()
+        [PSCustomObject] $queueScanExcess = $null
 
         # If the number of scans in the queue exceeds 
         # a threshold, send out an alert.
@@ -1330,7 +1358,8 @@ Class QueueMonitor {
             [String] $alertMsg = "Queued: [$($queuedScans.Count)]. Threshold: [$($this.queuedScansThreshold)]"
             $this.alertService.AddAlert([AlertType]::QUEUE_SCAN_EXCESS, $alertMsg, "") 
             # Create a JSON structure for the excess scans
-            $queueScanExcess = [ordered] @{
+            [PSCustomObject] $queueScanExcess = [ordered] @{
+                EventDate = ""
                 ScansQueued = "$($queuedScans.Count)"
                 Threshold   = "$($this.queuedScansThreshold)"
             }
@@ -1344,6 +1373,11 @@ Class QueueMonitor {
             
             # Calculate queued time
             [DateTime] $dateCreated = [Xml.XmlConvert]::ToDateTime($scan.dateCreated)
+            [String] $queuedDate = ""
+            if ($scan.queuedOn) {
+                [DateTime] $queuedOn = [Xml.XmlConvert]::ToDateTime($scan.queuedOn)
+                $queuedDate = $this.dateUtil.ToUTCAndFormat($queuedOn)
+            }
             [DateTime] $now = Get-Date
             [TimeSpan] $queuedTIme = New-TimeSpan -Start $dateCreated -End $now
 
@@ -1357,7 +1391,8 @@ Class QueueMonitor {
                 $this.alertService.AddAlert([AlertType]::QUEUE_SCAN_TIME_EXCEEDED, $alertMsg, $scanKey) 
 
                 # Create a JSON structure for scans that exceed threshold for queued state
-                $scanDetail = [ordered] @{
+                [PSCustomObject] $scanDetail = [ordered] @{
+                    EventDate       = ""
                     Threshold       = "$($this.queuedTimeThreshold)"
                     ScanId          = "$($scan.Id)"
                     ProjectId       = "$($scan.project.id)"
@@ -1365,10 +1400,10 @@ Class QueueMonitor {
                     Origin          = "$($scan.origin)"
                     IsPublic        = "$($scan.isPublic)"
                     IsIncremental   = "$($scan.isIncremental)"
-                    ScanRequestDate = "$($scan.dateCreated)"
-                    QueuedDate      = "$($scan.queuedOn)"
+                    ScanRequestDate = "$($this.dateUtil.ToUTCAndFormat($dateCreated))"
+                    QueuedDate      = "$queuedDate"
                 }  
-                $queueTimeExceeded.Add($scanDetail)
+                $this.io.WriteJSON([AlertType]::QUEUE_SCAN_TIME_EXCEEDED, $scanDetail) 
             }  
         } 
 
@@ -1379,20 +1414,12 @@ Class QueueMonitor {
             $this.io.WriteJSON([AlertType]::QUEUE_SCAN_EXCESS, $queueScanExcess) 
         }  
         
-        # If there are queued scans that exceed a time threshold
-        # write out the corresponding JSON file
-        if ($queueTimeExceeded.Count -gt 0) {
-            $this.io.WriteJSON([AlertType]::QUEUE_SCAN_TIME_EXCEEDED, $queueTimeExceeded) 
-        }
-
         # Sends out alerts if there are any
         $this.alertService.Send()                 
     }
 
     # Processes Running scans
     ProcessRunningScans ([Object[]] $runningScans) {
-
-        [System.Collections.ArrayList] $slowScans = @()
 
         foreach ($scan in $runningScans) {
             
@@ -1412,33 +1439,27 @@ Class QueueMonitor {
                 $this.alertService.AddAlert([AlertType]::SCAN_SLOW, $scanInfo, $scanKey)
 
                 # Create a JSON structure for slow scans that exceed estimated threshold
-                $scanDetail = [ordered] @{
+                [DateTime] $dateCreated = [Xml.XmlConvert]::ToDateTime($scan.dateCreated)
+                [PSCustomObject] $scanDetail = [ordered] @{
+                    EventDate                         = ""
                     ScanId                            = "$($scan.id)"
                     ProjectId                         = "$($scan.project.id)"
                     ProjectName                       = "$($scan.project.name)"
                     Origin                            = "$($scan.origin)"
                     IsIncremental                     = "$($scan.isIncremental)"
-                    ScanRequestDate                   = "$($scan.dateCreated)"
-                    # TODO: FileCount NOT in REST API
-                    # FileCount        = "$($scan)" 
+                    ScanRequestDate                   = "$($this.dateUtil.ToUTCAndFormat($dateCreated))"
                     Loc                               = "$($scan.loc)"
                     ScanStatus                        = "$($scan.stage.value)"
-                    # TODO: Confirm scan durations should be in milliseconds
-                    ScanDurationMilliseconds          = "$elapsedMinutes * 60 * 1000"
-                    EstimatedScanDurationMilliseconds = "$estimatedMinutes * 60 * 1000"
-                    ScannedLanguages                  = "$($scan.languages)"          
+                    ScanDurationMilliseconds          = "$($elapsedMinutes * 60 * 1000)"
+                    EstimatedScanDurationMilliseconds = "$($estimatedMinutes * 60 * 1000)"
+                    ScannedLanguages                  = $scan.languages          
                 }  
-                $slowScans.Add($scanDetail)
+                $this.io.WriteJSON([AlertType]::SCAN_SLOW, $scanDetail)
             }
             else {
                 # Log scan data
                 $this.io.LogEvent($scanInfo)
             }
-        }
-
-        # Write JSON blob for slow scans
-        if ($slowScans.Count -gt 0) {
-            $this.io.WriteJSON([AlertType]::SCAN_SLOW, $slowScans)
         }
 
         # Sends out alerts if there are any
@@ -1458,27 +1479,23 @@ Class QueueMonitor {
             if ($reason) { $reason = "(Reason: $reason)" }
             $this.alertService.AddAlert([AlertType]::SCAN_FAILED, "$scanInfo $reason", $scanKey)
 
+            [DateTime] $dateCreated = [Xml.XmlConvert]::ToDateTime($scan.dateCreated)
+
             # Create JSON structure for failed scans
-            [Hashtable] $failed = [ordered] @{            
+            [PSCustomObject] $failed = [ordered] @{     
+                EventDate        = ""       
                 ScanId           = "$($scan.id)"
                 ProjectId        = "$($scan.project.id)"
                 ProjectName      = "$($scan.project.name)"
                 Origin           = "$($scan.origin)"
                 IsPublic         = "$($scan.isPublic)"
                 IsIncremental    = "$($scan.isIncremental)"
-                ScanRequestDate  = "$($scan.dateCreated)"
-                # TODO: FileCount NOT in REST API
-                # FileCount        = "$($scan)" 
+                ScanRequestDate  = "$($this.dateUtil.ToUTCAndFormat($dateCreated))"
                 Loc              = "$($scan.loc)"
                 FailReason       = "$reason"
-                ScannedLanguages = "$($scan.languages)"
+                ScannedLanguages = $scan.languages
             }
-            $failedScans.Add($failed)
-        }
-
-        # Write out the JSON for failed scans
-        if ($failedScans.Count -gt 0) {
-            $this.io.WriteJSON([AlertType]::SCAN_FAILED, $failedScans)
+            $this.io.WriteJSON([AlertType]::SCAN_FAILED, $failed)
         }
 
         # Sends out alerts only if there are any
