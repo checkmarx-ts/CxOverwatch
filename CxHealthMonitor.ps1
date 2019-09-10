@@ -1539,7 +1539,7 @@ Class QueueMonitor {
     # Returns a human readable Scan Identifier
     [String] GetScanIdentifierForHumans($scan) {
         [String] $scanType = if ($scan.isIncremental -eq $True) { "Incremental" } else { "Full" }
-        return "Scan [$($scan.id), $($scan.project.Name), $scanType, $($scan.stage.value)]"
+        return "Scan [id: $($scan.id), project: $($scan.project.Name), type: $scanType, stage: $($scan.stage.value), loc: $($scan.loc), stage/total %: $($scan.stagePercent)/$($scan.totalPercent), engine: $($scan.engine.id)]"
     } 
 
     # Returns a machine readable Scan key
