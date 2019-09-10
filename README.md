@@ -99,10 +99,12 @@ The **"alerts"** section is used to configure values specific to Alerts.
  
 ```json
 "alerts": {
-        "waitingPeriodBetweenAlertsMinutes": 15
+        "waitingPeriodBetweenAlertsMinutes": 15,
+        "suppressionRegex": ""
     }
 ```
 * _waitingPeriodBetweenAlertsMinutes_: Period in minutes, to wait before sending out subsequent alerts arising from the same monitored subject and the same conditions. This configuration controls/prevents alert flooding.
+*_suppressionRegex_: Alert messages that match this regular expression will be suppressed. Supports multiple patterns like "(pattern1|pattern2)". 
 
 The **"alertingSystems"** section is used to configure available Alerting Systems to be used by the monitor.
 The monitor ships with multiple Alerting System implementations, such as Email(smtp), Syslog and Event Logs. When new implementations (such as SNMP etc.) are available, this is where they should be configured.

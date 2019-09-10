@@ -442,13 +442,23 @@ Class AlertService {
             if ($alertSystem.IsBatchMessages()) {
                 [String] $batchMessage = ""
                 foreach ($message in $this.alerts) {
-                    $batchMessage += "$message`n"
+                    if ($message -notmatch $this.supressionRegex) {
+                        $batchMessage += "$message`n"
+                    } else {
+                        Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
+                    }                    
                 }
-                $alertSystem.Send($batchMessage) 
+                if (![string]::IsNullOrEmpty($batchMessage)) {
+                    $alertSystem.Send($batchMessage)
+                }                 
             }
             else {
                 foreach ($message in $this.alerts) {
-                    $alertSystem.Send($message)
+                    if ($message -notmatch $this.suppressionRegex) {
+                        $alertSystem.Send($message)
+                    } else {
+                        Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
+                    }                    
                 }
             }
         }

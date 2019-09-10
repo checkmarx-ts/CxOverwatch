@@ -24,7 +24,8 @@
         "retries": 5
     },
     "alerts": {
-        "waitingPeriodBetweenAlertsMinutes": 15
+        "waitingPeriodBetweenAlertsMinutes": 15,
+        "suppressionRegex": ""
     },
     "alertingSystems": {
         "smtp": [
