@@ -4,7 +4,7 @@
     Gem Immauel (gem.immanuel@checkmarx.com)
     Checkmarx Professional Services
 
-    Usage: .\CxHealthMonitor.ps1 [-cxUser cxaccount] [-cxPass cxpassword] [-dbUser dbaccount] [-dbPass dbpassword] 
+    Usage: .\CxHealthMonitor.ps1 [-cxUser cxaccount] [-cxPass cxpassword] [-audit] [-dbUser dbaccount] [-dbPass dbpassword] 
 
     The command line parameters will override the values read from the 
     configuration file (cx_health_mon.config.json)
@@ -21,6 +21,9 @@ Param(
     [String]
     $cxPass = "",
 
+    [switch] 
+    $audit,
+
     [Parameter(Mandatory = $False)]
     [ValidateNotNullOrEmpty()]
     [String]
@@ -34,9 +37,11 @@ Param(
 
 # ----------------------- Module imports  ------------------------ #
 
-# This assumes that the SqlServer powershell module is already installed.
-# If not, run "Install-Module -Name Invoke-SqlCmd2" as an administrator prior to running this script.
-Import-Module "Invoke-SqlCmd2" -DisableNameChecking
+if ($audit) {
+    # This assumes that the SqlServer powershell module is already installed.
+    # If not, run "Install-Module -Name Invoke-SqlCmd2" as an administrator prior to running this script.
+    Import-Module "Invoke-SqlCmd2" -DisableNameChecking 
+}
 
 
 # CxSAST REST API auth values
@@ -99,6 +104,9 @@ Class IO {
         Write-Host "-----------------------------------------" -ForegroundColor Green
         Write-Host "Checkmarx Health Monitor" -ForegroundColor Green        
         Write-Host "Checkmarx CxSAST: $($script:config.cx.host)"
+        if ($script:audit) {
+            Write-Host "Checkmarx Database: $($script:config.cx.db.instance)"
+        }
         Write-Host "Poll interval (seconds): $($script:config.monitor.pollIntervalSeconds)"
         Write-Host "Default scan rate (LOC / Hour): $($script:config.monitor.thresholds.scanRateAsLOCPerHour)"
         Write-Host "Threshold for number of scans in the queued state: $($script:config.monitor.thresholds.queuedScansThreshold)"
@@ -1529,13 +1537,15 @@ $io = [IO]::new()
 # Create Engine(s) monitor
 [EngineMonitor] $engineMonitor = [EngineMonitor]::new($alertService)
 
-# Create a DB Client
-[DBClient] $dbClient = [DBClient]::new($config.cx.db.instance, $config.cx.db.username, $config.cx.db.password)
+if ($audit) {
+    # Create a DB Client
+    [DBClient] $dbClient = [DBClient]::new($config.cx.db.instance, $config.cx.db.username, $config.cx.db.password)
 
-# Create Audit(s) monitor
-[AuditMonitor] $auditMonitor = [AuditMonitor]::new($alertService)
-# Inject a DB Client
-$auditMonitor.SetDbClient($dbClient)
+    # Create Audit(s) monitor
+    [AuditMonitor] $auditMonitor = [AuditMonitor]::new($alertService)
+    # Inject a DB Client
+    $auditMonitor.SetDbClient($dbClient)
+}
 
 # Spit out pretty headers
 $io.WriteHeader()
@@ -1556,7 +1566,9 @@ while ($True) {
     $engineMonitor.Monitor()
 
     # Poll Audit DBs
-    $auditMonitor.Monitor()
+    if ($audit) {
+        $auditMonitor.Monitor()
+    }
 
     # Wait a bit before polling again
     Start-Sleep -Seconds $script:config.monitor.pollIntervalSeconds
