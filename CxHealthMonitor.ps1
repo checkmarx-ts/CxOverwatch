@@ -1574,7 +1574,7 @@ if ($dbPass) { $config.cx.db.password = $dbPass }
 
 
 # Create an IO utility object
-$io = [IO]::new()
+[IO] $io = [IO]::new()
 
 # Create the Alert Service
 [AlertService] $alertService = [AlertService]::new()
