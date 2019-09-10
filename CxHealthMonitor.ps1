@@ -626,7 +626,13 @@ Class DefaultScanTimeAlgo : ScanTimeAlgo {
     }
 
     # Saves a finished scan's duration to scan history
-    StoreScanDuration ($scan) {        
+    StoreScanDuration ($scan) {  
+        # Guard for case when engineStartedOn is not available which 
+        # happens when no source code changes were detected.  
+        if ([string]::IsNullOrEmpty($scan.engineStartedOn)) {
+            return
+        } 
+
         [String] $key = $this.GetKey($scan)
         
         # Add scan if no prior scans exist for given key
