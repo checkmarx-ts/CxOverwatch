@@ -250,9 +250,10 @@ Class EmailAlertSystem : AlertSystem {
     hidden [String] $subject
     hidden [String] $smtpSender
     hidden [String[]] $recipients
+    hidden [Boolean] $useSsl
 
     # Constructs the email alert system object
-    EmailAlertSystem ([String] $systemType, [String] $name, [String] $smtpHost, [int] $smtpPort, [String] $smtpUsername, [String] $smtpPassword, [String] $smtpSender, [String[]] $recipients, [String] $subject) {
+    EmailAlertSystem ([String] $systemType, [String] $name, [String] $smtpHost, [int] $smtpPort, [String] $smtpUsername, [String] $smtpPassword, [String] $smtpSender, [String[]] $recipients, [String] $subject, [Boolean] $useSsl) {
         $this.io = [IO]::new()
         $this.systemType = $systemType
         $this.name = $name
@@ -261,9 +262,13 @@ Class EmailAlertSystem : AlertSystem {
         $this.smtpSender = $smtpSender
         $this.recipients = $recipients
         $this.subject = $subject
-        [CredentialsUtil] $credUtil = [CredentialsUtil]::new()
-        $this.smtpCredentials = $credUtil.GetPSCredential($smtpUsername, $smtpPassword)
-
+        $this.useSsl = $useSsl
+        
+        # Support anonymous authenticated smtp scenario
+        if ($smtpUsername.Length -gt 0 -and $smtpPassword.Length -gt 0) {
+            [CredentialsUtil] $credUtil = [CredentialsUtil]::new()
+            $this.smtpCredentials = $credUtil.GetPSCredential($smtpUsername, $smtpPassword)
+        }
     }
 
     # Override default behavior
@@ -278,7 +283,27 @@ Class EmailAlertSystem : AlertSystem {
         # No-frills implementation
         try {
             $this.io.Log("Sending email alert to [$($this.name) : $($this.recipients)]")
-            Send-MailMessage -From $this.smtpSender -Body $message -Subject $this.subject -To $this.recipients -Priority High -SmtpServer $this.smtpHost -Port $this.smtpPort -UseSsl -Credential $this.smtpCredentials                             
+            
+            $mailargs = @{
+                From = $this.smtpSender
+                Body = $message
+                Subject = $this.subject
+                To = $this.recipients
+                Priority = "High"
+                SmtpServer = $this.smtpHost
+                Port = $this.smtpPort
+            }
+            
+            # If credentials are not provided then we will use anonymous smtp
+            if ($this.smtpCredentials) {
+                $mailargs.Add("Credential", $this.smtpCredentials)
+            }
+            
+            if ($this.useSsl) {
+                $mailargs.Add("UseSsl", $True)
+            }
+                        
+            Send-MailMessage @mailargs                        
         }
         catch {
             $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send email alert. Verify email configuration.")
@@ -336,7 +361,7 @@ Class AlertService {
             # Register SMTP systems, if configured
             if ($alertingSystem.smtp) {
                 foreach ($smtpSystem in $alertingSystem.smtp) {
-                    [AlertSystem] $emailAlertSystem = [EmailAlertSystem]::new($smtpSystem.systemType, $smtpSystem.name, $smtpSystem.host, $smtpSystem.port, $smtpSystem.user, $smtpSystem.password, $smtpSystem.sender, $smtpSystem.recipients, $smtpSystem.subject)    
+                    [AlertSystem] $emailAlertSystem = [EmailAlertSystem]::new($smtpSystem.systemType, $smtpSystem.name, $smtpSystem.host, $smtpSystem.port, $smtpSystem.user, $smtpSystem.password, $smtpSystem.sender, $smtpSystem.recipients, $smtpSystem.subject, $smtpSystem.useSsl)    
                     $this.AddAlertSystem($emailAlertSystem);
                 }
             }
@@ -417,13 +442,23 @@ Class AlertService {
             if ($alertSystem.IsBatchMessages()) {
                 [String] $batchMessage = ""
                 foreach ($message in $this.alerts) {
-                    $batchMessage += "$message`n"
+                    if ($message -notmatch $this.supressionRegex) {
+                        $batchMessage += "$message`n"
+                    } else {
+                        Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
+                    }                    
                 }
-                $alertSystem.Send($batchMessage) 
+                if (![string]::IsNullOrEmpty($batchMessage)) {
+                    $alertSystem.Send($batchMessage)
+                }                 
             }
             else {
                 foreach ($message in $this.alerts) {
-                    $alertSystem.Send($message)
+                    if ($message -notmatch $this.suppressionRegex) {
+                        $alertSystem.Send($message)
+                    } else {
+                        Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
+                    }                    
                 }
             }
         }
@@ -536,6 +571,9 @@ Class ScanTimeAlgo {
             $startTime = [Xml.XmlConvert]::ToDateTime($scanStart)
             if (!$scanEnd) {
                 $scanEnd = Get-Date
+                if ($script:config.monitor.useUTCTimeOnClient -eq "true") {
+                    $scanEnd = (Get-Date).ToUniversalTime()
+                }
             }
             $diff = New-TimeSpan -Start $startTime -End $scanEnd
             $elapsedTime = $diff.TotalMinutes            
@@ -598,7 +636,13 @@ Class DefaultScanTimeAlgo : ScanTimeAlgo {
     }
 
     # Saves a finished scan's duration to scan history
-    StoreScanDuration ($scan) {        
+    StoreScanDuration ($scan) {  
+        # Guard for case when engineStartedOn is not available which 
+        # happens when no source code changes were detected.  
+        if ([string]::IsNullOrEmpty($scan.engineStartedOn)) {
+            return
+        } 
+
         [String] $key = $this.GetKey($scan)
         
         # Add scan if no prior scans exist for given key
@@ -1505,7 +1549,7 @@ Class QueueMonitor {
     # Returns a human readable Scan Identifier
     [String] GetScanIdentifierForHumans($scan) {
         [String] $scanType = if ($scan.isIncremental -eq $True) { "Incremental" } else { "Full" }
-        return "Scan [$($scan.id), $($scan.project.Name), $scanType, $($scan.stage.value)]"
+        return "Scan [id: $($scan.id), project: $($scan.project.Name), type: $scanType, stage: $($scan.stage.value), loc: $($scan.loc), stage/total %: $($scan.stagePercent)/$($scan.totalPercent), engine: $($scan.engine.id)]"
     } 
 
     # Returns a machine readable Scan key
@@ -1540,7 +1584,7 @@ if ($dbPass) { $config.cx.db.password = $dbPass }
 
 
 # Create an IO utility object
-$io = [IO]::new()
+[IO] $io = [IO]::new()
 
 # Create the Alert Service
 [AlertService] $alertService = [AlertService]::new()

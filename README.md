@@ -69,6 +69,7 @@ The **"cx"** section drives connectivity to the Checkmarx server and database. T
 The **"monitor"** section is used to configure thresholds and monitoring parameters. 
 ```json
 "monitor": {
+        "useUTCTimeOnClient": "true",
         "pollIntervalSeconds": 30,
         "thresholds": {
             "queuedScansThreshold": 5,
@@ -82,6 +83,7 @@ The **"monitor"** section is used to configure thresholds and monitoring paramet
         "retries": 5
     }
 ```
+*_useUTCTimeOnClient_: "true" or "false" - if true forces UTC for calculation of time on the client. Useful when script runs on a machine in a local time zone but server runs in UTC.
 * _pollIntervalSeconds_: Polling cadence - how often the monitor will connect to the Checkmarx server for monitoring purposes.
 * _queuedScansThreshold_: Threshold for the maximum number of scans in the CxSAST Queue, beyond which alerts will be sent.
 * _queuedTimeThresholdMinutes_: Threshold for the number of minutes a scan can remain in the CxSAST Queue, beyond which alerts will be sent.
@@ -97,13 +99,19 @@ The **"alerts"** section is used to configure values specific to Alerts.
  
 ```json
 "alerts": {
-        "waitingPeriodBetweenAlertsMinutes": 15
+        "waitingPeriodBetweenAlertsMinutes": 15,
+        "suppressionRegex": ""
     }
 ```
 * _waitingPeriodBetweenAlertsMinutes_: Period in minutes, to wait before sending out subsequent alerts arising from the same monitored subject and the same conditions. This configuration controls/prevents alert flooding.
+*_suppressionRegex_: Alert messages that match this regular expression will be suppressed. Supports multiple patterns like "(pattern1|pattern2)". 
 
 The **"alertingSystems"** section is used to configure available Alerting Systems to be used by the monitor.
 The monitor ships with multiple Alerting System implementations, such as Email(smtp), Syslog and Event Logs. When new implementations (such as SNMP etc.) are available, this is where they should be configured.
+
+Leave smtp user and password blank for anonymous smtp.
+
+
 
 ```json
 "alertingSystems": {
@@ -117,7 +125,8 @@ The monitor ships with multiple Alerting System implementations, such as Email(s
                 "password": "somepassword",
                 "sender": "admin@myemailserver.com",
                 "recipients": "list@of.com, email@addresses.com",
-                "subject": "Checkmarx Health Monitor Alert"
+                "subject": "Checkmarx Health Monitor Alert",
+                "useSsl": true
             }
         ],
         "syslog": [
@@ -149,6 +158,7 @@ The _jsonDirectory_ element specifies where the JSON files output by the monitor
 ## Authors
 
 * Gem Immanuel, Checkmarx Professional Services - *Initial work*
+* Benjamin Stokes, Checkmarx Professional Services - patches
 
 
 ## License

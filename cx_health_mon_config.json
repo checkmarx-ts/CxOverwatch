@@ -10,6 +10,7 @@
         }
     },
     "monitor": {
+        "useUTCTimeOnClient": "false",
         "apiResponseTimeoutSeconds": 120,
         "pollIntervalSeconds": 30,
         "thresholds": {
@@ -23,7 +24,8 @@
         "retries": 5
     },
     "alerts": {
-        "waitingPeriodBetweenAlertsMinutes": 15
+        "waitingPeriodBetweenAlertsMinutes": 15,
+        "suppressionRegex": ""
     },
     "alertingSystems": {
         "smtp": [
@@ -36,7 +38,8 @@
                 "password": "xxxxx",
                 "sender": "admin@mailserver.com",
                 "recipients": "list@of.com, email@addresses.com",
-                "subject": "Checkmarx Health Monitor Alert"
+                "subject": "Checkmarx Health Monitor Alert",
+                "useSsl": true
             }
         ],
         "syslog": [
