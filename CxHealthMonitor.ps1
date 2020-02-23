@@ -311,6 +311,42 @@ Class EmailAlertSystem : AlertSystem {
     }
 }
 
+# -----------------------------------------------------------------
+# Slack Alert System
+# -----------------------------------------------------------------
+Class SlackAlertSystem : AlertSystem {
+
+    hidden [IO] $io
+    hidden [String] $systemType
+    hidden [String] $name
+    hidden [String] $hook
+
+    # Constructs the email alert system object
+    SlackAlertSystem ([String] $systemType, [String] $name, [String] $hook) {
+        $this.io = [IO]::new()
+        $this.systemType = $systemType
+        $this.name = $name
+        $this.hook = $hook
+    }
+
+    # Sends a Slack with message
+    Send([String] $message) {
+
+        # No-frills implementation
+        try {
+            $this.io.Log("Sending alert to [$($this.name)]")
+
+            # message has to be in json format so Slack can parse it
+            $body = '{"text":"' + $message + '"}'
+
+            Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
+        }
+        catch {
+            $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send slack alert. Verify slack configuration.")
+        }
+    }
+}
+
 # Enumerates types of alerts that we send
 # Helps keep track of which type of alert
 # was sent when and for which scan/project.
@@ -351,7 +387,8 @@ Class AlertService {
 
     # Register configured alert systems
     RegisterAlertSystems() {
-        # Register alerting systems specified in configuratoin file
+        # Register alerting systems specified in configuration file
+
         foreach ($alertingSystem in $script:config.alertingSystems) {
     
             # For now, we register each type of alerting systems separately.
@@ -371,6 +408,13 @@ Class AlertService {
                 foreach ($syslogSystem in $alertingSystem.syslog) {
                     [AlertSystem] $syslogAlertSystem = [SyslogAlertSystem]::new($syslogSystem.systemType, $syslogSystem.name, $syslogSystem.host, $syslogSystem.port)    
                     $this.AddAlertSystem($syslogAlertSystem);
+                }
+            }
+            # Register slack, if configured
+            if ($alertingSystem.slack) {
+                foreach ($slackSystem in $alertingSystem.slack) {
+                    [AlertSystem] $slackAlertSystem = [SlackAlertSystem]::new($slackSystem.systemType, $slackSystem.name, $slackSystem.hook)
+                    $this.AddAlertSystem($slackAlertSystem);
                 }
             }
         }
@@ -442,7 +486,7 @@ Class AlertService {
             if ($alertSystem.IsBatchMessages()) {
                 [String] $batchMessage = ""
                 foreach ($message in $this.alerts) {
-                    if ($message -notmatch $this.supressionRegex) {
+                    if ($message -notmatch $this.suppressionRegex) {
                         $batchMessage += "$message`n"
                     } else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed

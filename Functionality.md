@@ -4,6 +4,7 @@ The CxHealthMonitor is written in PowerShell and is designed to be modular. Addi
 > **Note : Supported Alerting Systems** The CxHealthMonitor supports the following systems:
 > - SMTP (Email)
 > - Syslog (Ex. Splunk, Kiwi, AlienVault, any SIEM system that accepts Syslog sources)
+> - Slack
 > - Event Logging 	(the monitor writes to the Console, a general log file and structured event data to an events file - to feed into 3rd
 > party log aggregator products) Additional alerting systems (such as
 > SNMP) can be written and plugged in if required.

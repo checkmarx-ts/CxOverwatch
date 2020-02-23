@@ -55,6 +55,13 @@
                 "host": "localhost",
                 "port": 515
             }
+        ],
+        "slack" : [
+            {
+                "systemType": "slack",
+                "name": "Slack",
+                "hook" : "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxx"
+            }
         ]
     },
     "log": {
