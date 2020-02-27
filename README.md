@@ -111,6 +111,7 @@ The monitor ships with multiple Alerting System implementations, such as Email(s
 
 Leave smtp user and password blank for anonymous smtp.
 
+Follow instructions on creating an incoming webhook at https://api.slack.com/messaging/webhooks for Slack notification.
 
 
 ```json
@@ -141,6 +142,13 @@ Leave smtp user and password blank for anonymous smtp.
                 "name": "Splunk",
                 "host": "localhost",
                 "port": 515
+            }
+        ],
+        "slack" : [
+            {
+                "systemType": "slack",
+                "name": "Slack",
+                "hook" : "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxx"
             }
         ]
     }
