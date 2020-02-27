@@ -486,7 +486,7 @@ Class AlertService {
             if ($alertSystem.IsBatchMessages()) {
                 [String] $batchMessage = ""
                 foreach ($message in $this.alerts) {
-                    if ($message -notmatch $this.suppressionRegex) {
+                    if ($message -notmatch $script:config.alerts.suppressionRegex -Or [String]::IsNullOrWhiteSpace($script:config.alerts.suppressionRegex)) {
                         $batchMessage += "$message`n"
                     } else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
@@ -498,7 +498,7 @@ Class AlertService {
             }
             else {
                 foreach ($message in $this.alerts) {
-                    if ($message -notmatch $this.suppressionRegex) {
+                    if ($message -notmatch $script:config.alerts.suppressionRegex -Or [String]::IsNullOrWhiteSpace($script:config.alerts.suppressionRegex)) {
                         $alertSystem.Send($message)
                     } else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
