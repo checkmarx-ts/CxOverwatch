@@ -4,7 +4,7 @@
     Gem Immauel (gem.immanuel@checkmarx.com)
     Checkmarx Professional Services
 
-    Usage: .\CxHealthMonitor.ps1 [-cxUser cxaccount] [-cxPass cxpassword] [-audit] [-dbUser dbaccount] [-dbPass dbpassword] 
+    Usage: .\CxHealthMonitor.ps1 [-config configFile] [-cxUser cxaccount] [-cxPass cxpassword] [-audit] [-dbUser dbaccount] [-dbPass dbpassword] 
 
     The command line parameters will override the values read from the 
     configuration file (cx_health_mon.config.json)
@@ -32,7 +32,12 @@ Param(
     [Parameter(Mandatory = $False)]
     [ValidateNotNullOrEmpty()]
     [String]
-    $dbPass = ""    
+    $dbPass = "",
+    
+    [Parameter(Mandatory = $False)]
+    [ValidateNotNullOrEmpty()]
+    [String]
+    $config = "" 
 )
 
 # ----------------------- Module imports  ------------------------ #
@@ -285,13 +290,13 @@ Class EmailAlertSystem : AlertSystem {
             $this.io.Log("Sending email alert to [$($this.name) : $($this.recipients)]")
             
             $mailargs = @{
-                From = $this.smtpSender
-                Body = $message
-                Subject = $this.subject
-                To = $this.recipients
-                Priority = "High"
+                From       = $this.smtpSender
+                Body       = $message
+                Subject    = $this.subject
+                To         = $this.recipients
+                Priority   = "High"
                 SmtpServer = $this.smtpHost
-                Port = $this.smtpPort
+                Port       = $this.smtpPort
             }
             
             # If credentials are not provided then we will use anonymous smtp
@@ -488,7 +493,8 @@ Class AlertService {
                 foreach ($message in $this.alerts) {
                     if ($message -notmatch $script:config.alerts.suppressionRegex -Or [String]::IsNullOrWhiteSpace($script:config.alerts.suppressionRegex)) {
                         $batchMessage += "$message`n"
-                    } else {
+                    }
+                    else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
                     }                    
                 }
@@ -500,7 +506,8 @@ Class AlertService {
                 foreach ($message in $this.alerts) {
                     if ($message -notmatch $script:config.alerts.suppressionRegex -Or [String]::IsNullOrWhiteSpace($script:config.alerts.suppressionRegex)) {
                         $alertSystem.Send($message)
-                    } else {
+                    }
+                    else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
                     }                    
                 }
@@ -719,24 +726,28 @@ Class Config {
 
     hidden [IO] $io
     hidden $config
-    static [String] $CONFIG_FILE = ".\cx_health_mon_config.json"
+    [String] $configFile = ".\cx_health_mon_config.json"
 
     # Constructs and loads configuration from given path
     Config () {
         $this.io = [IO]::new()
-        $this.LoadConfig()
+        # Override config file if provided
+        if ($script:config) {
+            $this.configFile = $script:config
+        }
+        $this.LoadConfig()        
     }
 
     # Loads configuration from configured path
     LoadConfig () {
         try {
-            $cp = [Config]::CONFIG_FILE
+            $cp = $this.configFile
             $configFilePath = (Get-Item -Path $cp).FullName
             $this.io.Log("Loading configuration from $configFilePath")
             $this.config = Get-Content -Path $configFilePath -Raw | ConvertFrom-Json
         }
         catch {
-            $this.io.Log("Provided configuration file at [" + [Config]::CONFIG_FILE + "] is missing / corrupt.")        
+            $this.io.Log("Provided configuration file at [" + $this.configconfigFile + "] is missing / corrupt.")        
         }
     }
 
@@ -1447,7 +1458,7 @@ Class QueueMonitor {
             $this.alertService.AddAlert([AlertType]::QUEUE_SCAN_EXCESS, $alertMsg, "") 
             # Create a JSON structure for the excess scans
             [PSCustomObject] $queueScanExcess = [ordered] @{
-                EventDate = ""
+                EventDate   = ""
                 ScansQueued = "$($queuedScans.Count)"
                 Threshold   = "$($this.queuedScansThreshold)"
             }
@@ -1619,6 +1630,10 @@ if ($psv -and $psv -lt 5) {
 }
 
 # Load configuration
+If ($config -and !(Test-Path $config)) {
+    Write-Host "Could not read from given config path [$config]"
+    Exit
+}
 [PSCustomObject] $config = [Config]::new().GetConfig()
 # Override if values were explicitly overridden via the commandline
 if ($cxUser) { $config.cx.username = $cxUser }

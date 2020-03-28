@@ -37,16 +37,18 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 ## Usage
 
 ```
-.\CxHealthMonitor.ps1 [-cxUser username] [-cxPass password] [-dbUser username] [-dbPass password]
+.\CxHealthMonitor.ps1 [-config configFile] [-cxUser username] [-cxPass password] [-dbUser username] [-dbPass password]
 ```
 
-The optional arguments will override the corresponding values provided in the configuration file. 
+The [-config configFile] argument is optional. If provided, configuration values will be read from the given file instead of the default configuration file (cx_health_mon_config.json).
+
+The following optional arguments will override the corresponding values provided in the configuration file. 
 
 Note: If the optional db parameters are skipped and the corresponding entries in the config file are empty, the monitor will use SQLServer authentication.
 
 ## Configuration
 
-The configuration file (cx_health_mon_config.json) consists of the following sections:
+The configuration file consists of the following sections:
 * cx
 * monitor
 * alerts
