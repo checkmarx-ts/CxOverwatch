@@ -962,7 +962,7 @@ Class EngineMonitor {
         [Object] $resp = $null
         for ($i = 0; $i -lt $script:config.monitor.retries; $i++) {             
             try {     
-                $resp = Invoke-WebRequest -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+                $resp = Invoke-WebRequest -UseBasicParsing -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
                 break
             }
             catch {
@@ -1367,7 +1367,7 @@ Class QueueMonitor {
         [Object] $resp = $null
         [String] $pageUrl = $script:config.cx.host + "/CxWebClient/Login.aspx"
         try {     
-            $resp = Invoke-WebRequest -Uri $pageUrl -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+            $resp = Invoke-WebRequest -UseBasicParsing -Uri $pageUrl -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
         }
         catch {
             $resp = $_.Exception.Response
