@@ -486,7 +486,7 @@ Class AlertService {
             if ($alertSystem.IsBatchMessages()) {
                 [String] $batchMessage = ""
                 foreach ($message in $this.alerts) {
-                    if ($message -notmatch $this.suppressionRegex) {
+                    if ($message -notmatch $script:config.alerts.suppressionRegex -Or [String]::IsNullOrWhiteSpace($script:config.alerts.suppressionRegex)) {
                         $batchMessage += "$message`n"
                     } else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
@@ -498,7 +498,7 @@ Class AlertService {
             }
             else {
                 foreach ($message in $this.alerts) {
-                    if ($message -notmatch $this.suppressionRegex) {
+                    if ($message -notmatch $script:config.alerts.suppressionRegex -Or [String]::IsNullOrWhiteSpace($script:config.alerts.suppressionRegex)) {
                         $alertSystem.Send($message)
                     } else {
                         Write-Host Alert [$message] suppressed due to matching suppressionRegex -ForegroundColor DarkRed
@@ -962,7 +962,7 @@ Class EngineMonitor {
         [Object] $resp = $null
         for ($i = 0; $i -lt $script:config.monitor.retries; $i++) {             
             try {     
-                $resp = Invoke-WebRequest -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+                $resp = Invoke-WebRequest -UseBasicParsing -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
                 break
             }
             catch {
@@ -1367,7 +1367,7 @@ Class QueueMonitor {
         [Object] $resp = $null
         [String] $pageUrl = $script:config.cx.host + "/CxWebClient/Login.aspx"
         try {     
-            $resp = Invoke-WebRequest -Uri $pageUrl -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+            $resp = Invoke-WebRequest -UseBasicParsing -Uri $pageUrl -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
         }
         catch {
             $resp = $_.Exception.Response
