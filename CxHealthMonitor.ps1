@@ -334,6 +334,10 @@ Class SlackAlertSystem : AlertSystem {
 
         # No-frills implementation
         try {
+			# This looks odd but it replaces the single backslash with double backslash.
+			# Need to do this for the slack body
+			$message = $message -replace '\\', '\\'
+
             $this.io.Log("Sending alert to [$($this.name)]")
 
             # message has to be in json format so Slack can parse it

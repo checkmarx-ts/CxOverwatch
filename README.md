@@ -37,10 +37,12 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 ## Usage
 
 ```
-.\CxHealthMonitor.ps1 [-cxUser username] [-cxPass password] [-dbUser username] [-dbPass password]
+.\CxHealthMonitor.ps1 [-cxUser username] [-cxPass password] [-dbUser username] [-dbPass password] [-audit]
 ```
 
 The optional arguments will override the corresponding values provided in the configuration file. 
+
+Add the argument -audit to enable monitoring of audits.  This is not enabled by default and should only be used if the user has access to the db.
 
 Note: If the optional db parameters are skipped and the corresponding entries in the config file are empty, the monitor will use SQLServer authentication.
 

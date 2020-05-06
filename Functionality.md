@@ -87,6 +87,11 @@ The monitor generates alerts for audit conditions that are frequently requested 
 - Query changes
 - Preset changes
 
+### Enable Audit Monitoring
+To enable audit monitoring, add the argument -audit when running CxOverwatch
+>`.\CxHealthMonitor.ps1 -audit`
+
+
 ### Scan Results : Severity / State changes
 Alerts are generated when scan results are updated - when the Severity and/or the State are changed. 
 
