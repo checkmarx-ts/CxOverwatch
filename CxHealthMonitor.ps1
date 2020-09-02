@@ -38,11 +38,20 @@ Param(
 # ----------------------- Module imports  ------------------------ #
 
 if ($audit) {
-    # This assumes that the SqlServer powershell module is already installed.
-    # If not, run "Install-Module -Name Invoke-SqlCmd2" as an administrator prior to running this script.
+
+    if(-not(Get-InstalledModule Invoke-SqlCmd2 -ErrorAction silentlycontinue))
+    {
+        Set-PSRepository PSGallery -InstallationPolicy Trusted
+        Install-Module Invoke-SqlCmd2 -Confirm:$False -Force   
+    }
     Import-Module "Invoke-SqlCmd2" -DisableNameChecking 
 }
 
+if(-not(Get-InstalledModule CredentialManager -ErrorAction silentlycontinue))
+{   #Module is imported automatically, if any cmdlets are used.
+    Set-PSRepository PSGallery -InstallationPolicy Trusted
+    Install-Module CredentialManager -Confirm:$False -Force
+}
 
 # CxSAST REST API auth values
 [String] $CX_REST_GRANT_TYPE = "password"
@@ -402,7 +411,19 @@ Class AlertService {
             # Register SMTP systems, if configured
             if ($alertingSystem.smtp) {
                 foreach ($smtpSystem in $alertingSystem.smtp) {
-                    [AlertSystem] $emailAlertSystem = [EmailAlertSystem]::new($smtpSystem.systemType, $smtpSystem.name, $smtpSystem.host, $smtpSystem.port, $smtpSystem.user, $smtpSystem.password, $smtpSystem.sender, $smtpSystem.recipients, $smtpSystem.subject, $smtpSystem.useSsl)    
+
+                    $EMAIL_CREDENTIALS = "CxOverwatch.EmailAlert"
+                    $emailCredentials = Get-StoredCredential -Target $EMAIL_CREDENTIALS #Get from Windows Credential Manager
+                    $emailUsername = ""
+                    $emailPassword = ""
+
+                    if ($emailCredentials) {
+                        Write-Host "Found Email credentials."
+                        $emailUsername = $emailCredentials.UserName
+                        $emailPassword = $emailCredentials.GetNetworkCredential().Password
+                    }
+
+                    [AlertSystem] $emailAlertSystem = [EmailAlertSystem]::new($smtpSystem.systemType, $smtpSystem.name, $smtpSystem.host, $smtpSystem.port, $emailUsername, $emailPassword, $smtpSystem.sender, $smtpSystem.recipients, $smtpSystem.subject, $smtpSystem.useSsl)    
                     $this.AddAlertSystem($emailAlertSystem);
                 }
             }
@@ -943,7 +964,7 @@ Class EngineMonitor {
         # Create a REST Client for CxSAST REST API
         $this.cxSastRestClient = [RESTClient]::new($script:config.cx.host, $cxSastRestBody)
         # Login to the CxSAST server
-        [bool] $isLoginOk = $this.cxSastRestClient.login($script:config.cx.username, $script:config.cx.password)
+        [bool] $isLoginOk = $this.cxSastRestClient.login($script:cxUsername, $script:cxPassword)
 
         if ($isLoginOk -eq $True) {
             # Fetch Queue Status
@@ -1319,7 +1340,7 @@ Class QueueMonitor {
         $this.cxSastRestClient = [RESTClient]::new($script:config.cx.host, $cxSastRestBody)
         
         # Login to the CxSAST server
-        [bool] $isLoginOk = $this.cxSastRestClient.login($script:config.cx.username, $script:config.cx.password)
+        [bool] $isLoginOk = $this.cxSastRestClient.login($script:cxUsername, $script:cxPassword)
 
         if ($isLoginOk -eq $True) {
             # Fetch Queue Status
@@ -1625,10 +1646,62 @@ if ($psv -and $psv -lt 5) {
 # Load configuration
 [PSCustomObject] $config = [Config]::new().GetConfig()
 # Override if values were explicitly overridden via the commandline
-if ($cxUser) { $config.cx.username = $cxUser }
-if ($cxPass) { $config.cx.password = $cxPass }
-if ($dbUser) { $config.cx.db.username = $dbUser }
-if ($dbPass) { $config.cx.db.password = $dbPass }
+
+#Target name for storing the SAST credentials in Windows Credential Manager
+[String] $SAST_CREDENTIALS = "CxOverwatch.SAST"
+[String] $SAST_DB_CREDENTIALS = "CxOverwatch.SAST.DB"
+
+
+if ($cxUser -and $cxPass) #SAST Credentials provided through commandline argument.
+{
+    $cxUsername = $cxUser
+    $cxPassword = $cxPass
+    #Store them for future use.
+    New-StoredCredential -Target $SAST_CREDENTIALS -Persist 'LocalMachine' -Comment 'Used for CxOverwatch.' -UserName $cxUser -Password $cxPass | Out-Null
+
+}
+else {  # Use Credential Manager
+    #Check if the SAST credentials are present in Windows Credential Manager.
+    $sastCredentials = Get-StoredCredential -Target $SAST_CREDENTIALS
+
+    if (!$sastCredentials) {
+        Write-Host "Required credentials not found in Windows Credential Manager."
+        Write-Host "Kindly enter the CxSAST credentials."
+
+        #Create new credentials - store against LocalMachine (so can be used by other sessions of the current user)
+        New-StoredCredential -Target $SAST_CREDENTIALS -Persist 'LocalMachine' -Comment 'Used for CxOverwatch.' -Credentials $(Get-Credential) | Out-Null
+        $sastCredentials = Get-StoredCredential -Target $SAST_CREDENTIALS
+    }
+
+    $cxUsername = $sastCredentials.UserName
+    $cxPassword = $sastCredentials.GetNetworkCredential().Password
+
+}
+
+if ($dbUser -and $dbPass) # SAST-DB Credentials provided through commandline argument.
+{
+    Write-Host "Using the user provided credentials for SAST-DB"
+    $cxDbUser = $dbUser
+    $cxDbPassword = $dbPass
+    #Store them for future use.
+    New-StoredCredential -Target $SAST_DB_CREDENTIALS -Persist 'LocalMachine' -Comment 'Used for CxOverwatch SAST-DB.' -UserName $dbUser -Password $dbPass | Out-Null
+
+}
+else {  # Use Credential Manager
+    #Check if the SAST-DB credentials are present in Windows Credential Manager.
+    $sastDatabaseCredentials = Get-StoredCredential -Target $SAST_DB_CREDENTIALS
+
+    if ($sastDatabaseCredentials) {
+        Write-Host "Found SAST-DB credentials."
+        $cxDbUser = $sastDatabaseCredentials.UserName
+        $cxDbPassword = $sastDatabaseCredentials.GetNetworkCredential().Password
+    }
+    else {
+        Write-Host "Using Windows Authentication for SQL Server"
+        $cxDbUser = ""
+        $cxDbPassword = ""
+    }
+}
 
 
 # Create an IO utility object
@@ -1648,7 +1721,7 @@ if ($dbPass) { $config.cx.db.password = $dbPass }
 
 if ($audit) {
     # Create a DB Client
-    [DBClient] $dbClient = [DBClient]::new($config.cx.db.instance, $config.cx.db.username, $config.cx.db.password)
+    [DBClient] $dbClient = [DBClient]::new($config.cx.db.instance, $cxDbUser, $cxDbPassword)
 
     # Create Audit(s) monitor
     [AuditMonitor] $auditMonitor = [AuditMonitor]::new($alertService)

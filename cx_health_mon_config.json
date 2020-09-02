@@ -1,12 +1,8 @@
 {
     "cx": {
         "host": "http://localhost",
-        "username": "admin@cx",
-        "password": "xxxx",
         "db": {
             "instance": "localhost\\SQLExpress",
-            "username": "",
-            "password": ""
         }
     },
     "monitor": {
@@ -34,8 +30,6 @@
                 "name": "Email",
                 "host": "smtp.mailserver.com",
                 "port": 587,
-                "user": "someuser@mailserver.com",
-                "password": "xxxxx",
                 "sender": "admin@mailserver.com",
                 "recipients": "list@of.com, email@addresses.com",
                 "subject": "Checkmarx Health Monitor Alert",

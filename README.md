@@ -29,10 +29,43 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 
 * Powershell V5 (Windows 10 has powershell 5.1 installed)
    * https://docs.microsoft.com/en-us/powershell/scripting/install/installing-windows-powershell?view=powershell-6
-* Invoke-SqlCmd2 module
-   * Run : Install-Module -Name Invoke-SqlCmd2
 * Access to the Checkmarx Server and Database
+* Adding the following credentials to the Windows Credential Manager (One time process)
+	1) **Checkmarx SAST Credentials** : 
+		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)
+		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.
+		3. Click on 'Add a generic credential' and enter the following values:
+			Internet or network address : **CxOverwatch.SAST**  (Kindly make sure you copy the same name as mentioned here)
+			User name : cxadmin
+			Password : xxxxx
+		
+		4. Click 'Ok' to save your credentials.
+		
+	2) **Checkmarx SAST DB Credentials** : 
+		Note : Storing SAST database credentials is Optional. If you want to use Windows Authentication for the SQL Server, DO NOT add the credentials for the database.
+		
+		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)
+		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.
+		3. Click on 'Add a generic credential' and enter the following values:
+			Internet or network address : **CxOverwatch.SAST.DB**  (Kindly make sure you copy the same name as mentioned here)
+			User name : dbuser
+			Password : xxxxx
+		
+		4. Click 'Ok' to save your credentials.
 
+	3) **Email Alert Credentials** : 
+		Note : Storing Email credentials is Optional. If you are not using Email as your alert system or if you want to use anonymous SMTP, you can ignore this section. 
+		
+		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)
+		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.
+		3. Click on 'Add a generic credential' and enter the following values:
+			Internet or network address : **CxOverwatch.EmailAlert**  (Kindly make sure you copy the same name as mentioned here)
+			User name : username@mailserver.com
+			Password : xxxxx
+		
+		4. Click 'Ok' to save your credentials.
+
+Note : If the script is not able to find the Checkmarx SAST credentials in the Credential Manager, it will show a prompt to user asking for the SAST username and password.
 
 ## Usage
 
@@ -40,11 +73,11 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 .\CxHealthMonitor.ps1 [-cxUser username] [-cxPass password] [-dbUser username] [-dbPass password] [-audit]
 ```
 
-The optional arguments will override the corresponding values provided in the configuration file. 
+The optional arguments will override the corresponding values stored in the Credential Manager. 
 
 Add the argument -audit to enable monitoring of audits.  This is not enabled by default and should only be used if the user has access to the db.
 
-Note: If the optional db parameters are skipped and the corresponding entries in the config file are empty, the monitor will use SQLServer authentication.
+Note: If the optional db parameters are skipped and the corresponding entries in the Credential Manager are empty, the monitor will use SQLServer Windows authentication.
 
 ## Configuration
 
@@ -54,16 +87,12 @@ The configuration file (cx_health_mon_config.json) consists of the following sec
 * alerts
 * alertingSystems
 
-The **"cx"** section drives connectivity to the Checkmarx server and database. The Checkmarx Server URL, Checkmarx manager connection credentials, database instance and database connection credentials are configured here.
+The **"cx"** section drives connectivity to the Checkmarx server and database. The Checkmarx Server URL and database instance are configured here.
 ```json
 "cx": {
         "host": "http://checkmarx.domain.com",
-        "username": "your_account",
-        "password": "your_password",
         "db": {
-            "instance": "localhost\\SQLExpress",
-            "username": "",
-            "password": ""
+            "instance": "localhost\\SQLExpress"
         }
     }
 ```
@@ -124,8 +153,6 @@ Follow instructions on creating an incoming webhook at https://api.slack.com/mes
                 "name": "Email",
                 "host": "007-myemailserver.com",
                 "port": 587,
-                "user": "someuser@myemailserver.com",
-                "password": "somepassword",
                 "sender": "admin@myemailserver.com",
                 "recipients": "list@of.com, email@addresses.com",
                 "subject": "Checkmarx Health Monitor Alert",
