@@ -32,36 +32,36 @@ The tool consists of two files - a Powershell script (the monitor) and a JSON fi
 * Access to the Checkmarx Server and Database
 * Adding the following credentials to the Windows Credential Manager (One time process)
 	1) **Checkmarx SAST Credentials** : 
-		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)
-		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.
-		3. Click on 'Add a generic credential' and enter the following values:
-			Internet or network address : **CxOverwatch.SAST**  (Kindly make sure you copy the same name as mentioned here)
-			User name : cxadmin
-			Password : xxxxx
+		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)  
+		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.  
+		3. Click on 'Add a generic credential' and enter the following values:  
+			Internet or network address : **CxOverwatch.SAST**  (Kindly make sure you copy the same name as mentioned here)  
+			User name : cxadmin  
+			Password : xxxxx  
 		
 		4. Click 'Ok' to save your credentials.
 		
-	2) **Checkmarx SAST DB Credentials** : 
-		Note : Storing SAST database credentials is Optional. If you want to use Windows Authentication for the SQL Server, DO NOT add the credentials for the database.
+	2) **Checkmarx SAST DB Credentials** :   
+		Note : Storing SAST database credentials is Optional. If you want to use Windows Authentication for the SQL Server, DO NOT add the credentials for the database.  
 		
-		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)
-		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.
-		3. Click on 'Add a generic credential' and enter the following values:
-			Internet or network address : **CxOverwatch.SAST.DB**  (Kindly make sure you copy the same name as mentioned here)
-			User name : dbuser
-			Password : xxxxx
+		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)  
+		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.  
+		3. Click on 'Add a generic credential' and enter the following values:  
+			Internet or network address : **CxOverwatch.SAST.DB**  (Kindly make sure you copy the same name as mentioned here)  
+			User name : dbuser  
+			Password : xxxxx  
 		
-		4. Click 'Ok' to save your credentials.
+		4. Click 'Ok' to save your credentials.  
 
-	3) **Email Alert Credentials** : 
-		Note : Storing Email credentials is Optional. If you are not using Email as your alert system or if you want to use anonymous SMTP, you can ignore this section. 
+	3) **Email Alert Credentials** :   
+		Note : Storing Email credentials is Optional. If you are not using Email as your alert system or if you want to use anonymous SMTP, you can ignore this section.   
 		
-		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)
-		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.
-		3. Click on 'Add a generic credential' and enter the following values:
-			Internet or network address : **CxOverwatch.EmailAlert**  (Kindly make sure you copy the same name as mentioned here)
-			User name : username@mailserver.com
-			Password : xxxxx
+		1. Open the Windows Credential Manager ( Control Panel -> Credential Manager)  
+		2. Click on 'Windows Credentials' and scroll down till you see 'Generic Credentials' section.  
+		3. Click on 'Add a generic credential' and enter the following values:  
+			Internet or network address : **CxOverwatch.EmailAlert**  (Kindly make sure you copy the same name as mentioned here)  
+			User name : username@mailserver.com  
+			Password : xxxxx  
 		
 		4. Click 'Ok' to save your credentials.
 
