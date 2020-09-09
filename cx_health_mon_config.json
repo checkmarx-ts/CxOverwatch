@@ -2,7 +2,7 @@
     "cx": {
         "host": "http://localhost",
         "db": {
-            "instance": "localhost\\SQLExpress",
+            "instance": "localhost\\SQLExpress"
         }
     },
     "monitor": {
