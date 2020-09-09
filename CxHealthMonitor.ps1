@@ -108,6 +108,20 @@ Class IO {
         # Create timestamp 
         [DateTime] $timestamp = $this.dateUtil.NowUTC()
         [String] $fileSuffix = $timestamp.ToString([IO]::FILE_SUFFIX_TIMESTAMP_FORMAT)
+        
+        if(((Get-Item -Path $jsonOutDir).LastWriteTime.DayOfYear) -lt ((Get-Date).DayOfYear))
+        {   #Zip the current json folder
+            [String] $ZIPPED_LOGS = "zipped_logs"
+            if(!(Get-Item $ZIPPED_LOGS -ErrorAction SilentlyContinue))
+            {
+                New-Item -ItemType Directory -Name $ZIPPED_LOGS -Force
+            }
+
+            [String] $jsonFolderName = (Get-Item -Path $jsonOutDir).Name
+            [String] $newFolderName = $jsonFolderName + "_$fileSuffix.zip"
+            Compress-Archive -Path $jsonFolderName -DestinationPath "$ZIPPED_LOGS\$newFolderName" -CompressionLevel Fastest
+            Remove-Item -Path "$jsonFolderName\*" -Force -Recurse
+        }
 
         # Update JSON blob with timestamp
         $object.EventDate = $this.dateUtil.Format($timestamp)
@@ -115,7 +129,7 @@ Class IO {
         # Create file name
         [String] $fileName = $jsonFile.ToString().ToLower() + "_$fileSuffix.json"
         [String] $jsonFilePath = Join-Path -Path "$jsonOutDir" -ChildPath $fileName
-
+        
         # Write to file
         Add-content $jsonFilePath -Value ($object | ConvertTo-Json)
     }
@@ -139,6 +153,28 @@ Class IO {
     
     # Utility that writes to given file
     hidden WriteToFile([String] $message, [String] $file) {
+
+        $existingFile = Get-Item $file -ErrorAction SilentlyContinue
+         if ($existingFile) { 
+             
+            if(($existingFile.LastWriteTime.DayOfYear) -lt ((Get-Date).DayOfYear))
+            {
+                #Zip the current file
+                [DateTime] $timestamp = $this.dateUtil.NowUTC()
+                [String] $fileSuffix = $timestamp.ToString([IO]::FILE_SUFFIX_TIMESTAMP_FORMAT)
+                [String] $newFileName = $file + "_$fileSuffix"
+                [String] $newZipFileName = $file + "_$fileSuffix.zip"
+
+                [String] $ZIPPED_LOGS = "zipped_logs"
+                if(!(Get-Item $ZIPPED_LOGS -ErrorAction SilentlyContinue))
+                {
+                    New-Item -ItemType Directory -Name $ZIPPED_LOGS -Force
+                }
+                Rename-Item $existingFile.Name -NewName $newFileName
+                Compress-Archive -Path $newFileName -DestinationPath "$ZIPPED_LOGS\$newZipFileName"
+                Remove-Item $newFileName -Force
+            }
+        }
         Add-content $file -Value $this.AddTimestamp($message)
     }
 

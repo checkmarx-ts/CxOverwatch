@@ -114,7 +114,8 @@ The **"monitor"** section is used to configure thresholds and monitoring paramet
         "retries": 5
     }
 ```
-*_useUTCTimeOnClient_: "true" or "false" - if true forces UTC for calculation of time on the client. Useful when script runs on a machine in a local time zone but server runs in UTC.
+
+* _useUTCTimeOnClient_: "true" or "false" - if true forces UTC for calculation of time on the client. Useful when script runs on a machine in a local time zone but server runs in UTC.
 * _pollIntervalSeconds_: Polling cadence - how often the monitor will connect to the Checkmarx server for monitoring purposes.
 * _queuedScansThreshold_: Threshold for the maximum number of scans in the CxSAST Queue, beyond which alerts will be sent.
 * _queuedTimeThresholdMinutes_: Threshold for the number of minutes a scan can remain in the CxSAST Queue, beyond which alerts will be sent.
@@ -192,6 +193,8 @@ The _jsonDirectory_ element specifies where the JSON files output by the monitor
     }
 ```    
     
+**Log Rotation** : The script will zip the log files every night and move them to the folder named 'zipped_logs'.
+	
 ## Authors
 
 * Gem Immanuel, Checkmarx Professional Services - *Initial work*
