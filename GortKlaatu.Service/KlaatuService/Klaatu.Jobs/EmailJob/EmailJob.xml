@@ -1,4 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- This is a sample configuration section for the CxOverwatch Job. 
+     Make sure it is copied to the KlaatuService's jobs.xml file and properly configured. -->
+
 <!--http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger-->
 <!--Field Name Mandatory	Allowed Values Allowed Special Characters
 Seconds	YES	0-59	, - * /

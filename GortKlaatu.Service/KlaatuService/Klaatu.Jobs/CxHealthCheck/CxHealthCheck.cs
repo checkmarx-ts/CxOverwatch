@@ -116,8 +116,8 @@ namespace Klaatu.Jobs
 				Logger.Info(message: $"CxHealthCheck::ExecuteJob{LogOnlyText} - Attempting Login as {user}");
 				//TODO: Fix the Connected Services references then uncomment this.
 				// Log in check the upness of the Checkmarx API. We log in the API even during "Logonly" operations. Logging in is safe.
-				//CmxClientFactory.InitializeClient(CxApiUsername, CxApiPassword);
-				//success = CmxClientFactory.CxWsSoapClient != null;
+				CmxClientFactory.InitializeClient(CxApiUsername, CxApiPassword);
+				success = CmxClientFactory.CxWsSoapClient != null;
 			}
 			catch (Exception ex)
 			{
@@ -128,7 +128,7 @@ namespace Klaatu.Jobs
 			finally
 			{
 				//TODO: Fix the Connected Services references then uncomment this.
-				// CmxClientFactory.Close();
+				CmxClientFactory.Close();
 			}
 
 			if (success)

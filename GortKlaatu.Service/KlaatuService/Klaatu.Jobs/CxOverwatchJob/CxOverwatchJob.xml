@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <!-- This is a sample configuration section for the CxOverwatch Job. 
-     Make sure it is copied to the KlaatuService's klaatu_jobs.xml file and properly configured. -->
+     Make sure it is copied to the KlaatuService's jobs.xml file and properly configured. -->
 
 <!-- https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/crontriggers.html 
 Cron-Expressions are used to configure instances of CronTrigger. 

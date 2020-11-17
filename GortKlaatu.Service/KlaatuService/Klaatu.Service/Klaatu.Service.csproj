@@ -70,11 +70,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Jobs.xml" />
-    <Content Include="klaatu_jobs.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
+    <Content Include="jobs.xml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Common.Logging.NLog41">

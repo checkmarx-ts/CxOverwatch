@@ -95,7 +95,7 @@ namespace Klaatu.Service
 					{
 						["quartz.plugin.triggHistory.type"] = "Quartz.Plugin.History.LoggingJobHistoryPlugin, Quartz.Plugins",
 						["quartz.plugin.jobInitializer.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz.Plugins",
-						["quartz.plugin.jobInitializer.fileNames"] = "klaatu_jobs.xml",
+						["quartz.plugin.jobInitializer.fileNames"] = "jobs.xml",
 						["quartz.plugin.jobInitializer.failOnFileNotFound"] = "true",
 						["quartz.plugin.jobInitializer.scanInterval"] = "120"
 					};

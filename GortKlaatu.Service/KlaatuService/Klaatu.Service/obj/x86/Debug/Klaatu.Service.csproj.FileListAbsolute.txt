@@ -1,4 +1,3 @@
-D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Service\bin\Debug\klaatu_jobs.xml
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Service\bin\Debug\KlaatuService.exe.config
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Service\bin\Debug\KlaatuService.exe
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Service\bin\Debug\KlaatuService.pdb
