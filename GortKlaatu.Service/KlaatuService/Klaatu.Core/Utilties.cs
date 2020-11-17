@@ -119,38 +119,7 @@ namespace Klaatu.Core
 		/// <returns>True or False</returns>
 		public static bool VerifyAddress(string emailAddress)
 		{
-			return true;
-		}
-
-		/// <summary>
-		/// Verifies the repository. Does the specified repsitory belong to the specified user?   
-		/// </summary>
-		/// <param name="repoName">Repository name</param>
-		///// <param name="emailAddress">User email address</param>
-		/// <returns>True or False.</returns>
-		public static bool VerifyRepository(string repoName, string emailAddress)
-		{
-			var DoesRepositoryExist = true;
-
-			// If the emailAddress is null or empty, then don't match the repository to the user.
-			if (string.IsNullOrEmpty(emailAddress))
-			{
-				return DoesRepositoryExist;
-			}
-			else
-			{
-				return DoesRepositoryExist && DoesRepositoryBelongTo(repoName, emailAddress);
-			}
-		}
-
-		/// <summary>
-		/// Checks to see if the specified repository belongs to the person with the specified email address. 
-		/// </summary>
-		/// <param name="repoName">Repository name</param>
-		/// <param name="emailAddress">Email address to check.</param>
-		/// <returns>True or False</returns>
-		public static bool DoesRepositoryBelongTo(string repoName, string emailAddress)
-		{
+			//TODO: Implement RegEx Validation. For now just return.
 			return true;
 		}
 
