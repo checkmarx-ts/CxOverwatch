@@ -1,9 +1,9 @@
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\bin\Debug\netstandard2.0\Klaatu.Core.deps.json
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\bin\Debug\netstandard2.0\Klaatu.Core.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\bin\Debug\netstandard2.0\Klaatu.Core.pdb
+D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.csprojAssemblyReference.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.AssemblyInfoInputs.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.AssemblyInfo.cs
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.csproj.CoreCompileInputs.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.pdb
-D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Core\obj\Debug\netstandard2.0\Klaatu.Core.csprojAssemblyReference.cache

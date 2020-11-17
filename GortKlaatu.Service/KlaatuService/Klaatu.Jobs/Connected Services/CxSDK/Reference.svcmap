@@ -19,10 +19,10 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="D:\Projects\GitHub\KohlsCollab\KlaatuService\CxSDKWebService.wsdl" Protocol="file" SourceId="1" />
+    <MetadataSource Address="D:\Projects\GitHub\Collab\KlaatuService\CxSDKWebService.wsdl" Protocol="file" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="CxSDKWebService.wsdl" MetadataType="Wsdl" ID="036a2dd9-b3bd-4e1f-ae33-fd5c00c090e5" SourceId="1" SourceUrl="file:///D:/Projects/GitHub/KohlsCollab/KlaatuService/CxSDKWebService.wsdl" />
+    <MetadataFile FileName="CxSDKWebService.wsdl" MetadataType="Wsdl" ID="036a2dd9-b3bd-4e1f-ae33-fd5c00c090e5" SourceId="1" SourceUrl="file:///D:/Projects/GitHub/Collab/KlaatuService/CxSDKWebService.wsdl" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

@@ -1,5 +1,3 @@
-D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.csprojAssemblyReference.cache
-D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.csproj.CoreCompileInputs.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\bin\Debug\Klaatu.Jobs.dll.config
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\bin\Debug\Klaatu.Jobs.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\bin\Debug\Klaatu.Jobs.pdb
@@ -20,6 +18,8 @@ D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\bin\Debug\Klaatu.Core.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\bin\Debug\System.Numerics.Vectors.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\bin\Debug\Klaatu.Core.pdb
+D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.csprojAssemblyReference.cache
+D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.csproj.CoreCompileInputs.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.csproj.CopyComplete
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Jobs\obj\Debug\Klaatu.Jobs.pdb

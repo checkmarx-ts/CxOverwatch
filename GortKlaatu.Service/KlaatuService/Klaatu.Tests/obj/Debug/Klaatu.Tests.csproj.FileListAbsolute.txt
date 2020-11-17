@@ -1,5 +1,3 @@
-D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\Klaatu.Tests.csprojAssemblyReference.cache
-D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\Klaatu.Tests.csproj.CoreCompileInputs.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\bin\Debug\KlaatuTests.dll.config
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\bin\Debug\KlaatuTests.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\bin\Debug\KlaatuTests.pdb
@@ -13,6 +11,8 @@ D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\bin\Debug\Klaatu.Jobs.dll.config
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\bin\Debug\Quartz.pdb
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\bin\Debug\Klaatu.Core.pdb
+D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\Klaatu.Tests.csprojAssemblyReference.cache
+D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\Klaatu.Tests.csproj.CoreCompileInputs.cache
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\Klaatu.Tests.csproj.CopyComplete
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\KlaatuTests.dll
 D:\Projects\GitHub\Checkmarx\CxOverwatch-MyFork\GortKlaatu.Service\KlaatuService\Klaatu.Tests\obj\Debug\KlaatuTests.pdb

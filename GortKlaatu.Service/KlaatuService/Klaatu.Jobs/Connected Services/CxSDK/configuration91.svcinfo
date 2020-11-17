@@ -221,10 +221,10 @@
     </bindingConfiguration>
   </bindingConfigurations>
   <endpoints>
-    <endpoint name="CxSDKWebServiceSoap" contract="CxSDK.CxSDKWebServiceSoap" bindingType="basicHttpBinding" address="https://nwc00854.cp.ad.kohls.com/Cxwebinterface/SDK/CxSDKWebService.asmx" bindingConfiguration="CxSDKWebServiceSoap">
+    <endpoint name="CxSDKWebServiceSoap" contract="CxSDK.CxSDKWebServiceSoap" bindingType="basicHttpBinding" address="https://CheckmarxUrl/Cxwebinterface/SDK/CxSDKWebService.asmx" bindingConfiguration="CxSDKWebServiceSoap">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>https://nwc00854.cp.ad.kohls.com/Cxwebinterface/SDK/CxSDKWebService.asmx</serializedValue>
+          <serializedValue>https://CheckmarxUrl/Cxwebinterface/SDK/CxSDKWebService.asmx</serializedValue>
         </property>
         <property path="/behaviorConfiguration" isComplexType="false" isExplicitlyDefined="false" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue />

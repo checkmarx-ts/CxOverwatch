@@ -2340,10 +2340,10 @@
   </wsdl:binding>
   <wsdl:service name="CxSDKWebService">
     <wsdl:port name="CxSDKWebServiceSoap" binding="tns:CxSDKWebServiceSoap">
-      <soap:address location="https://nwc00854.cp.ad.kohls.com/Cxwebinterface/SDK/CxSDKWebService.asmx" />
+      <soap:address location="https://CheckmarxUrl/Cxwebinterface/SDK/CxSDKWebService.asmx" />
     </wsdl:port>
     <wsdl:port name="CxSDKWebServiceSoap12" binding="tns:CxSDKWebServiceSoap12">
-      <soap12:address location="https://nwc00854.cp.ad.kohls.com/Cxwebinterface/SDK/CxSDKWebService.asmx" />
+      <soap12:address location="https://CheckmarxUrl/Cxwebinterface/SDK/CxSDKWebService.asmx" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

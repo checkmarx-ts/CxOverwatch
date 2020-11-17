@@ -89,10 +89,10 @@
   </wsdl:binding>
   <wsdl:service name="CxWSResolver">
     <wsdl:port name="CxWSResolverSoap" binding="tns:CxWSResolverSoap">
-      <soap:address location="https://nwc00854.cp.ad.kohls.com/Cxwebinterface/CxWsResolver.asmx" />
+      <soap:address location="https://CheckmarxUrl/Cxwebinterface/CxWsResolver.asmx" />
     </wsdl:port>
     <wsdl:port name="CxWSResolverSoap12" binding="tns:CxWSResolverSoap12">
-      <soap12:address location="https://nwc00854.cp.ad.kohls.com/Cxwebinterface/CxWsResolver.asmx" />
+      <soap12:address location="https://CheckmarxUrl/Cxwebinterface/CxWsResolver.asmx" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
