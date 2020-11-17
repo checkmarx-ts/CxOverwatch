@@ -70,7 +70,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="jobs.xml" />
+    <Content Include="jobs.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Common.Logging.NLog41">
