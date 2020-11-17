@@ -9,10 +9,12 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Klaatu.Jobs</RootNamespace>
-    <AssemblyName>KlaatuJobs</AssemblyName>
+    <AssemblyName>Klaatu.Jobs</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,58 +38,268 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CxOverwatchJob\AlertSystem\RestClient.cs" />
+    <Compile Include="CmxClientFactory.cs" />
+    <Compile Include="Connected Services\CxWsDataSvc\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="CxHealthCheck\CxHealthCheck.cs" />
+    <Compile Include="Connected Services\CxSDK\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Connected Services\CxWsResolver\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="CxOverwatchJob\AlertSystem\AlertEnums.cs" />
     <Compile Include="CxOverwatchJob\AlertSystem\IAlertLog.cs" />
+    <Compile Include="CxOverwatchJob\AlertSystem\RestClient.cs" />
     <Compile Include="CxOverwatchJob\AlertSystem\SlackAlertSystem.cs" />
     <Compile Include="CxOverwatchJob\AlertSystem\SMTPAlertSystem.cs" />
-    <Compile Include="CxOverwatchJob\AlertSystem\AlertEnums.cs" />
     <Compile Include="CxOverwatchJob\AlertSystem\SysLogAlertSystem.cs" />
     <Compile Include="CxOverwatchJob\CxOverwatchJob.cs" />
+    <Compile Include="EmailJob\EmailJob.cs" />
+    <Compile Include="EmailJob\EmailJobMessage.cs" />
     <Compile Include="SampleJob\SampleJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\CxSDK\CxSDKWebService.wsdl" />
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.BranchProjectByIdResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CancelScanResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CreateScanReportResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSBasicRepsonse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSCreateReportResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSReportStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseConfigSetList.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseGroupList.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseLoginData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponsePresetList.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseProjectConfig.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseProjectScannedDisplayData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseProjectsDisplayData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseRunID.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseScanResults.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseScansDisplayData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseScanStatus.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseScanSummary.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseTeamLdapGroupMappingData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.CxWSResponseUserData.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.DeleteProjectsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.DeleteScansResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.DeleteUserResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.ExecuteDataRetentionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetAllUsersResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetAssociatedGroupsListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetConfigurationSetListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetPresetListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetProjectConfigurationResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetProjectScannedDisplayDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetProjectsDisplayDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetScanReportResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetScanReportStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetScansDisplayDataForAllProjectsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetScanSummaryResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetStatusOfSingleScanResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.GetTeamLdapGroupsMappingResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.IsValidProjectNameResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.LoginResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.LoginWithTokenResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.LogoutResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.ScanResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.ScanWithOriginNameResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.ScanWithSchedulingResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.ScanWithSchedulingWithCronResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.SetTeamLdapGroupsMappingResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.SsoLoginResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.StopDataRetentionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.UpdateProjectConfigurationResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.UpdateProjectIncrementalConfigurationResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxSDK\Klaatu.Jobs.CxSDK.UpdateScanCommentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxWsDataSvc\Service.wsdl" />
+    <None Include="Connected Services\CxWsDataSvc\Service.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\CxWsDataSvc\Service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\CxWsResolver\CxWsResolver.wsdl" />
+    <None Include="Connected Services\CxWsResolver\Klaatu.Jobs.CxWsResolver.CxWSResponseDiscovery.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\CxWsResolver\Klaatu.Jobs.CxWsResolver.GetWebServiceUrlResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Common.Logging.NLog41">
-      <Version>3.4.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CSharp">
-      <Version>4.7.0</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.3</Version>
-    </PackageReference>
-    <PackageReference Include="Quartz">
-      <Version>3.0.7</Version>
-    </PackageReference>
-    <PackageReference Include="Quartz.Plugins">
-      <Version>3.0.7</Version>
-    </PackageReference>
-    <PackageReference Include="System.Net.Http">
-      <Version>4.3.4</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="Connected Services\CxWsDataSvc\Service.disco" />
+    <None Include="Connected Services\CxWsDataSvc\configuration91.svcinfo" />
+    <None Include="Connected Services\CxWsDataSvc\configuration.svcinfo" />
+    <None Include="Connected Services\CxWsDataSvc\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <Content Include="CxHealthCheck\CxHealthCheck.xml" />
+    <None Include="Connected Services\CxWsResolver\configuration91.svcinfo" />
+    <None Include="Connected Services\CxWsResolver\configuration.svcinfo" />
+    <None Include="Connected Services\CxWsResolver\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Connected Services\CxSDK\configuration91.svcinfo" />
+    <None Include="Connected Services\CxSDK\configuration.svcinfo" />
+    <None Include="Connected Services\CxSDK\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
     <Content Include="CxOverwatchJob\CxOverwatchJob.xml" />
+    <Content Include="EmailJob\EmailJob.xml" />
     <Content Include="SampleJob\SampleJob.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\CxSDK\" />
+    <WCFMetadataStorage Include="Connected Services\CxWsDataSvc\" />
+    <WCFMetadataStorage Include="Connected Services\CxWsResolver\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Klaatu.Core\Klaatu.Core.csproj">
+      <Project>{a05be54a-36bd-46f1-ad53-942351776cbc}</Project>
+      <Name>Klaatu.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>REM Copy $(TargetPath)  $(SolutionDir)Klaatu.Service\$(OutDir)</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

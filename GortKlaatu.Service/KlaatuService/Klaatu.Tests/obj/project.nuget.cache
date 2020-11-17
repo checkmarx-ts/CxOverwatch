@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "odrpL2BDdCewyVfhzYlrYCBJLYFc0CV2J6qZrrHHBJkxWEX6V3PlcCHKiEklovs7qGwxklopr1e/cYxQI7aTSw==",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Tests\\Klaatu.Tests.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\nunit\\3.12.0\\nunit.3.12.0.nupkg.sha512"
+  ],
+  "logs": []
+}

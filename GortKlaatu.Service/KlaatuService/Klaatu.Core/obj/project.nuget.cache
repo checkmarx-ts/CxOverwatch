@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "NXQwrsaTwn8/BwMTSgpm5vaNz1GjYNdCsuMtAw4iI6L9beJhykCmj4CeY2Piz8QE5aBClaC8E20hOvPCnQrTbA==",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Core\\Klaatu.Core.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,258 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.7.2": {
+      "NUnit/3.12.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "build": {
+          "build/NUnit.props": {}
+        }
+      },
+      "Klaatu.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        }
+      },
+      "Klaatu.Jobs/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Klaatu.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win": {
+      "NUnit/3.12.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "build": {
+          "build/NUnit.props": {}
+        }
+      },
+      "Klaatu.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        }
+      },
+      "Klaatu.Jobs/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Klaatu.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x64": {
+      "NUnit/3.12.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "build": {
+          "build/NUnit.props": {}
+        }
+      },
+      "Klaatu.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        }
+      },
+      "Klaatu.Jobs/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Klaatu.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x86": {
+      "NUnit/3.12.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "runtime": {
+          "lib/net45/nunit.framework.dll": {}
+        },
+        "build": {
+          "build/NUnit.props": {}
+        }
+      },
+      "Klaatu.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Core.dll": {}
+        }
+      },
+      "Klaatu.Jobs/1.0.0": {
+        "type": "project",
+        "dependencies": {
+          "Klaatu.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Klaatu.Jobs.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "NUnit/3.12.0": {
+      "sha512": "3oJTrcUcT9wmweBUwgUf0f1XIYy6RZq2ziV+RM95HMKAJGsHPN2i3MKK1dAPvDPMRLz799Llj4eyu/STB9Q7OA==",
+      "type": "package",
+      "path": "nunit/3.12.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "CHANGES.md",
+        "LICENSE.txt",
+        "NOTICES.txt",
+        "build/NUnit.props",
+        "lib/net35/nunit.framework.dll",
+        "lib/net35/nunit.framework.pdb",
+        "lib/net35/nunit.framework.xml",
+        "lib/net40/nunit.framework.dll",
+        "lib/net40/nunit.framework.pdb",
+        "lib/net40/nunit.framework.xml",
+        "lib/net45/nunit.framework.dll",
+        "lib/net45/nunit.framework.pdb",
+        "lib/net45/nunit.framework.xml",
+        "lib/netstandard1.4/nunit.framework.dll",
+        "lib/netstandard1.4/nunit.framework.pdb",
+        "lib/netstandard1.4/nunit.framework.xml",
+        "lib/netstandard2.0/nunit.framework.dll",
+        "lib/netstandard2.0/nunit.framework.pdb",
+        "lib/netstandard2.0/nunit.framework.xml",
+        "nunit.3.12.0.nupkg.sha512",
+        "nunit.nuspec"
+      ]
+    },
+    "Klaatu.Core/1.0.0": {
+      "type": "project",
+      "path": "../Klaatu.Core/Klaatu.Core.csproj",
+      "msbuildProject": "../Klaatu.Core/Klaatu.Core.csproj"
+    },
+    "Klaatu.Jobs/1.0.0": {
+      "type": "project",
+      "path": "../Klaatu.Jobs/Klaatu.Jobs.csproj",
+      "msbuildProject": "../Klaatu.Jobs/Klaatu.Jobs.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.7.2": [
+      "Klaatu.Jobs >= 1.0.0",
+      "NUnit >= 3.12.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\": {},
+    "C:\\Microsoft\\Xamarin\\NuGet\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Tests\\Klaatu.Tests.csproj",
+      "projectName": "Klaatu.Tests",
+      "projectPath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Tests\\Klaatu.Tests.csproj",
+      "packagesPath": "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\",
+      "outputPath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Tests\\obj\\",
+      "projectStyle": "PackageReference",
+      "skipContentFileWrite": true,
+      "fallbackFolders": [
+        "C:\\Microsoft\\Xamarin\\NuGet\\"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\Phillip H. Blanton\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net472"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net472": {
+          "projectReferences": {
+            "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Jobs\\Klaatu.Jobs.csproj": {
+              "projectPath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Jobs\\Klaatu.Jobs.csproj"
+            }
+          }
+        }
+      }
+    },
+    "frameworks": {
+      "net472": {
+        "dependencies": {
+          "NUnit": {
+            "target": "Package",
+            "version": "[3.12.0, )"
+          }
+        }
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}

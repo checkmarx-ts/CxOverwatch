@@ -38,7 +38,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="ServiceDebugger">
-      <HintPath>..\..\ServiceDebugger\Build\ServiceDebugger.dll</HintPath>
+      <HintPath>..\..\ServiceDebugger\ServiceDebugger.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
