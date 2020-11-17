@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "dgSpecHash": "zeLnBQRXxApDhMMAmBdLchopv5zI2C/pgm/BvNX0u7Y2mbjiCvjFmmviq7oJVG8vBfBjCm8CVTa1a7497UgHSA==",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Jobs\\Klaatu.Jobs.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\common.logging\\3.4.1\\common.logging.3.4.1.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\common.logging.core\\3.4.1\\common.logging.core.3.4.1.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\common.logging.nlog41\\3.4.1\\common.logging.nlog41.3.4.1.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\nlog\\4.1.2\\nlog.4.1.2.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\quartz\\3.0.7\\quartz.3.0.7.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\quartz.jobs\\3.0.7\\quartz.jobs.3.0.7.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\quartz.plugins\\3.0.7\\quartz.plugins.3.0.7.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.io\\4.3.0\\system.io.4.3.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.net.http\\4.3.4\\system.net.http.4.3.4.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.security.cryptography.algorithms\\4.3.0\\system.security.cryptography.algorithms.4.3.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.security.cryptography.encoding\\4.3.0\\system.security.cryptography.encoding.4.3.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.security.cryptography.primitives\\4.3.0\\system.security.cryptography.primitives.4.3.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\system.security.cryptography.x509certificates\\4.3.0\\system.security.cryptography.x509certificates.4.3.0.nupkg.sha512"
+  ],
+  "logs": []
+}
