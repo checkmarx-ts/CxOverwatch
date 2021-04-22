@@ -853,6 +853,21 @@ Class RESTClient {
         $this.baseUrl = $cxHost + "/cxrestapi"
         $this.restBody = $restBody 
     }
+    <#
+    # returns CxSAST version
+    #>
+    [String] version () {
+        try {
+            $versionUrl = $this.baseUrl + "/system/version"
+            $response = Invoke-RestMethod -uri $versionUrl -method GET -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+            $cxVersion = $response.version + " HF" + $response.hotFix
+        }
+        catch {            
+            $this.io.Log("Could not retrieve version CxSAST. Most probably using a version below 9.0. Reason: HTTP [$($_.Exception.Response.StatusCode.value__)] - $($_.Exception.Response.StatusDescription).")
+            $cxVersion = "below 9.0 version"
+        }
+        return $cxVersion 
+    }
 
     <#
     # Logins to the CxSAST REST API
@@ -986,12 +1001,14 @@ Class EngineMonitor {
     hidden [AlertService] $alertService
     hidden [RESTClient] $cxSastRestClient
     hidden [DateTimeUtil] $dateUtil
+    hidden [String] $cxVersion
     
     # Constructs a EngineMonitor
     EngineMonitor ([AlertService] $alertService) {
         $this.io = [IO]::new()
         $this.dateUtil = [DateTimeUtil]::new()
         $this.alertService = $alertService
+        $this.cxVersion = "Unknown"
     }
 
     Monitor() {
@@ -999,6 +1016,8 @@ Class EngineMonitor {
         $cxSastRestBody = [RESTBody]::new($script:CX_REST_GRANT_TYPE, $script:CX_REST_SCOPE, $script:CX_REST_CLIENT_ID, $script:CX_REST_CLIENT_SECRET)
         # Create a REST Client for CxSAST REST API
         $this.cxSastRestClient = [RESTClient]::new($script:config.cx.host, $cxSastRestBody)
+        # Get Version of CxSAST server
+        $this.cxVersion = $this.cxSastRestClient.version()
         # Login to the CxSAST server
         [bool] $isLoginOk = $this.cxSastRestClient.login($script:cxUsername, $script:cxPassword)
 
@@ -1022,14 +1041,20 @@ Class EngineMonitor {
     [Object] GetEngineWSDL ([String] $name, [String]$apiUri) { 
         [Object] $resp = $null
         for ($i = 0; $i -lt $script:config.monitor.retries; $i++) {             
-            try {     
-                $resp = Invoke-WebRequest -UseBasicParsing -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
-                break
-            }
-            catch {
+            try {
+                if($this.cxVersion.StartsWith("9.3")){
+                    $resp = Invoke-WebRequest -UseBasicParsing -Uri "${apiUri}/swagger/index.html" -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+                    break
+                } else{
+                    $resp = Invoke-WebRequest -UseBasicParsing -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+                    break
+                }
+            } catch {
                 $resp = $_.Exception.Response
-                $this.io.Log("ERROR: Checking engine $name : [$($_.Exception.Message)]")
-                if ($i -lt $script:config.mnitor.retries) { $this.io.Log("Attempting again...") }
+                $this.io.Log("ERROR: Checking engine $name - $apiUri : [$($_.Exception.Message)]")
+                if ($i -lt $script:config.mnitor.retries) { 
+                    $this.io.Log("Attempting again...") 
+                }
             }
         }
         return $resp
