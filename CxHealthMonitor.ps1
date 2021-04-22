@@ -357,9 +357,9 @@ Class EmailAlertSystem : AlertSystem {
 }
 
 # -----------------------------------------------------------------
-# Slack Alert System
+# Webhooks Alert System
 # -----------------------------------------------------------------
-Class SlackAlertSystem : AlertSystem {
+Class WebhooksAlertSystem : AlertSystem {
 
     hidden [IO] $io
     hidden [String] $systemType
@@ -367,31 +367,27 @@ Class SlackAlertSystem : AlertSystem {
     hidden [String] $hook
 
     # Constructs the email alert system object
-    SlackAlertSystem ([String] $systemType, [String] $name, [String] $hook) {
+    WebhooksAlertSystem ([String] $systemType, [String] $name, [String] $hook) {
         $this.io = [IO]::new()
         $this.systemType = $systemType
         $this.name = $name
         $this.hook = $hook
     }
 
-    # Sends a Slack with message
+    # Sends a Webhooks with message
     Send([String] $message) {
 
         # No-frills implementation
         try {
-			# This looks odd but it replaces the single backslash with double backslash.
-			# Need to do this for the slack body
-			$message = $message -replace '\\', '\\'
-
             $this.io.Log("Sending alert to [$($this.name)]")
-
-            # message has to be in json format so Slack can parse it
-            $body = '{"text":"' + $message + '"}'
-
-            Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
+            $body = @{
+                text = $message
+            }
+            $body = $body | ConvertTo-Json
+            $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
         }
         catch {
-            $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send slack alert. Verify slack configuration.")
+            $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send Webhooks [$($this.systemType)] alert. Verify Webhooks [$($this.systemType)] configuration.")
         }
     }
 }
@@ -471,11 +467,11 @@ Class AlertService {
                     $this.AddAlertSystem($syslogAlertSystem);
                 }
             }
-            # Register slack, if configured
-            if ($alertingSystem.slack) {
-                foreach ($slackSystem in $alertingSystem.slack) {
-                    [AlertSystem] $slackAlertSystem = [SlackAlertSystem]::new($slackSystem.systemType, $slackSystem.name, $slackSystem.hook)
-                    $this.AddAlertSystem($slackAlertSystem);
+            # Register webhooks, if configured
+            if ($alertingSystem.webhooks) {
+                foreach ($webhookSystem in $alertingSystem.webhooks) {
+                    [AlertSystem] $webhookAlertSystem = [WebhooksAlertSystem]::new($webhookSystem.systemType, $webhookSystem.name, $webhookSystem.hook)
+                    $this.AddAlertSystem($webhookAlertSystem);
                 }
             }
         }
@@ -862,7 +858,7 @@ Class RESTClient {
             $response = Invoke-RestMethod -uri $versionUrl -method GET -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
             $cxVersion = $response.version + " HF" + $response.hotFix
         }
-        catch {            
+        catch {
             $this.io.Log("Could not retrieve version CxSAST. Most probably using a version below 9.0. Reason: HTTP [$($_.Exception.Response.StatusCode.value__)] - $($_.Exception.Response.StatusDescription).")
             $cxVersion = "below 9.0 version"
         }
@@ -888,8 +884,7 @@ Class RESTClient {
         try {
             $loginUrl = $this.baseUrl + "/auth/identity/connect/token"
             $response = Invoke-RestMethod -uri $loginUrl -method POST -body $body -contenttype 'application/x-www-form-urlencoded' -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
-        }
-        catch {            
+        } catch {
             $this.io.Log("Could not authenticate against Checkmarx REST API. Reason: HTTP [$($_.Exception.Response.StatusCode.value__)] - $($_.Exception.Response.StatusDescription).")
         }
     

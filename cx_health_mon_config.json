@@ -50,11 +50,16 @@
                 "port": 515
             }
         ],
-        "slack" : [
+        "webhooks" : [
             {
                 "systemType": "slack",
                 "name": "Slack",
                 "hook" : "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxx"
+            },
+            {
+                "systemType": "msteams",
+                "name": "Teams",
+                "hook" : "https://<company>.webhook.office.com/webhookb2/xxxxxxxxxxxxxxxxxxx/IncomingWebhook/xxxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxx"
             }
         ]
     },
