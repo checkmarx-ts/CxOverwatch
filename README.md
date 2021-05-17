@@ -143,7 +143,9 @@ The monitor ships with multiple Alerting System implementations, such as Email(s
 
 Leave smtp user and password blank for anonymous smtp.
 
-Follow instructions on creating an incoming webhook at https://api.slack.com/messaging/webhooks for Slack notification.
+Follow instructions on creating an incoming webhook for:
+- Slack notifications: https://api.slack.com/messaging/webhooks
+- Teams notifications: https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook
 
 
 ```json
@@ -174,11 +176,16 @@ Follow instructions on creating an incoming webhook at https://api.slack.com/mes
                 "port": 515
             }
         ],
-        "slack" : [
+        "webhooks" : [
             {
                 "systemType": "slack",
                 "name": "Slack",
                 "hook" : "https://hooks.slack.com/services/xxxxxxxxxxxxxxxxxxx"
+            },
+            {
+                "systemType": "msteams",
+                "name": "Teams",
+                "hook" : "https://<company>.webhook.office.com/webhookb2/xxxxxxxxxxxxxxxxxxx/IncomingWebhook/xxxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxx"
             }
         ]
     }
