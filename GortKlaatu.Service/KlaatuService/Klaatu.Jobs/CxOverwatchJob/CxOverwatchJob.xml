@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- This is a sample configuration section for the CxOverwatch Job. 
+     Make sure it is copied to the KlaatuService's jobs.xml file and properly configured. -->
+
+<!-- https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/crontriggers.html 
+Cron-Expressions are used to configure instances of CronTrigger. 
+Cron-Expressions are strings that are actually made up of seven sub-expressions that describe individual 
+details of the schedule. These sub-expression are separated with white-space, and represent:
+ * Seconds	YES	0-59	, - * /
+ * Minutes	YES	0-59	, - * /
+ * Hours	YES	0-23	, - * /
+ * Day of month	YES	1-31	, - * ? / L W
+ * Month	YES	1-12 or JAN-DEC	, - * /
+ * Day of week	YES	1-7 or SUN-SAT	, - * ? / L #
+ * Year	NO	empty, 1970-2099	, - * /
+ 
+An example of a complete cron-expression is the string "0 0 12 ? * WED" - which means "every Wednesday at 12:00 pm".
+
+More Examples:
+0 0/5 * * * ?              fires every 5 minutes
+10 0/5 * * * ?             Fire every 5 minutes, at 10 seconds after the minute
+0 30 10-13 ? * WED,FRI     Fire at 10:30, 11:30, 12:30, and 13:30, on every Wednesday and Friday.
+0 10,44 14 ? 3 WED         Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.
+0 0/30 8-9 5,20 * ?        Fire every half hour between the hours of 8 am and 10 am on the 5th and 20th of every month. This trigger will NOT fire at 10:00 am, just at 8:00, 8:30, 9:00 and 9:30
+0 0 11 ? * SUN             Fire saturday at 11 PM
+0 0 12 * * ?               Fire at 12pm (noon) every day
+0 15 10 ? * *              Fire at 10:15am every day
+0 15 10 * * ?              Fire at 10:15am every day
+0 15 10 * * ? *            Fire at 10:15am every day
+0 15 10 * * ? 2005         Fire at 10:15am every day during the year 2005
+0 * 14 * * ?               Fire every minute starting at 2pm and ending at 2:59pm, every day
+0 0/5 14 * * ?             Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day
+0 0/5 14,18 * * ?          Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day
+0 0-5 14 * * ?             Fire every minute starting at 2pm and ending at 2:05pm, every day
+0 15 10 ? * MON-FRI        Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday
+0 15 10 15 * ?             Fire at 10:15am on the 15th day of every month
+0 15 10 L * ?              Fire at 10:15am on the last day of every month
+0 15 10 ? * 6L             Fire at 10:15am on the last Friday of every month
+0 15 10 ? * 6L             Fire at 10:15am on the last Friday of every month
+0 15 10 ? * 6L 2002-2005   Fire at 10:15am on every last friday of every month during the years 2002, 2003, 2004 and 2005
+0 15 10 ? * 6#3            Fire at 10:15am on the third Friday of every month
+0 0 12 1/5 * ?             Fire at 12pm (noon) every 5 days every month, starting on the first day of the month.
+0 11 11 11 11 ?            Fire every November 11th at 11:11am.
+-->
+
+<job-scheduling-data xmlns="http://quartznet.sourceforge.net/JobSchedulingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+
+	<processing-directives>
+		<overwrite-existing-data>true</overwrite-existing-data>
+	</processing-directives>
+
+	<schedule>
+		<job>
+			<name>CxOverwatchJob</name>
+			<group>jobGroup1</group>
+			<description>CxOverwatch, Checkmarx Health Check Job</description>
+			<job-type>Klaatu.Jobs.CxOverwatchJob, KlaatuJobs</job-type>
+			<durable>true</durable>
+			<recover>false</recover>
+			<job-data-map>
+				<entry>
+					<key>LogOnly</key>
+					<value>true</value>
+				</entry>
+				<entry>
+					<key>Message</key>
+					<value>CxOverwatchJob Is Running!</value>
+				</entry>
+				<entry>
+					<key>CxAPIHost</key>
+					<value>https://<!--checkmarxURL-->/Cxwebinterface/CxWsResolver.asmx</value>
+				</entry>
+				<entry>
+					<key>CxAPIUsername</key>
+					<value>servicebot@cx</value>
+				</entry>
+				<entry>
+					<key>CxAPIPassword</key>
+					<value>xxxxxx</value>
+				</entry>
+				<entry>
+					<key>CxDBConnStr</key>
+					<value>localhost\\sqlserver</value>
+				</entry>
+				<entry>
+					<key>CxDBUser</key>
+					<value>dbuser@cx</value>
+				</entry>
+				<entry>
+					<key>CxDBPassword</key>
+					<value>xxxxxxx</value>
+				</entry>
+
+				<!-- Monitor Settings -->
+				<entry>
+					<key>UseUTCTimeOnClient</key>
+					<value>false</value>
+				</entry>
+				<entry>
+					<key>APIResponseTimeoutSeconds</key>
+					<value>120</value>
+				</entry>
+				<entry>
+					<key>Retries</key>
+					<value>5</value>
+				</entry>
+
+				<!-- Thresholds -->
+				<entry>
+					<key>QueuedScansThreshold</key>
+					<value>5</value>
+				</entry>
+				<entry>
+					<key>QueuedTimeThresholdMinutes</key>
+					<value>20</value>
+				</entry>
+				<entry>
+					<key>ScanDurationThresholdMarginPercent</key>
+					<value>25</value>
+				</entry>
+				<entry>
+					<key>ScanRateAsLOCPerHour</key>
+					<value>150000</value>
+				</entry>
+				<entry>
+					<key>EngineResponseThresholdSeconds</key>
+					<value>60</value>
+				</entry>
+				<entry>
+					<key>RestResponseThresholdSeconds</key>
+					<value>60</value>
+				</entry>
+
+				<!-- Alert Settings -->
+				<entry>
+					<key>AlertingSystem</key>
+					<value>Splunk</value>
+				</entry>
+				<entry>
+					<key>WaitingPeriodBetweenAlertsMinutes</key>
+					<value>15</value>
+				</entry>
+				<entry>
+					<key>SuppressionRegex</key>
+					<value></value>
+				</entry>
+
+				<!-- SMTP Settings -->
+				<entry>
+					<key>SMTP_Host</key>
+					<value>smtp.mailserver.com</value>
+				</entry>
+				<entry>
+					<key>SMTP_Port</key>
+					<value>587</value>
+				</entry>
+				<entry>
+					<key>SMTP_User</key>
+					<value>smtp_user@mailserver.com</value>
+				</entry>
+				<entry>
+					<key>SMTP_Password</key>
+					<value>xxxxx</value>
+				</entry>
+				<entry>
+					<key>SMTP_Sender</key>
+					<value>admin@mailserver.com</value>
+				</entry>
+				<entry>
+					<key>SMTP_Recipients</key>
+					<!-- Must separate multiple addresses with a semicolon! -->
+					<value>list@of.com;email@addresses.com</value>
+				</entry>
+				<entry>
+					<key>SMTP_Subject</key>
+					<value>Checkmarx Health Monitor Alert</value>
+				</entry>
+				<entry>
+					<key>SMTP_UseSsl</key>
+					<value>true</value>
+				</entry>
+
+				<!-- Syslog Settings -->
+				<!-- Options are Kiwi or Splunk -->
+				<entry>
+					<key>SyslogName</key>
+					<value>Splunk</value>
+				</entry>
+				<entry>
+					<key>SyslogHost</key>
+					<value>localhost</value>
+				</entry>
+				<entry>
+					<key>SyslogPort</key>
+					<value>515</value>
+				</entry>
+
+				<!-- Slack Settings -->
+				<entry>
+					<key>SlackName</key>
+					<value>Slack</value>
+				</entry>
+				<entry>
+					<key>SlackHook</key>
+					<value>"https://hooks.slack.com/services/<!--SlackKey-->"</value>
+				</entry>
+			</job-data-map>
+		</job>
+	</schedule>
+
+	<!-- Trigger Definitions -->
+	<trigger>
+		<simple>
+			<name>CxOverwatchJobSimpleTrigger</name>
+			<group>simpleTriggerGroup</group>
+			<description>Triggers the CxOverwatchJob</description>
+			<job-name>CxOverwatchJob</job-name>
+			<job-group>jobGroup1</job-group>
+			<start-time>1982-06-28T18:15:00.0Z</start-time>
+			<end-time>2030-09-04T18:13:51.0Z</end-time>
+			<misfire-instruction>SmartPolicy</misfire-instruction>
+			<repeat-count>100</repeat-count>
+			<repeat-interval>1000</repeat-interval>
+		</simple>
+	</trigger>
+
+	<object id="CxOverwatchJobCronTrigger" type="Spring.Scheduling.Quartz.CronTriggerObject, Spring.Scheduling.Quartz2">
+		<property name="jobDetail" ref="CxOverwatchJob" />
+		<property name="cronExpressionString" value="0 15 10 14 * ?" />
+	</object>
+
+	<!-- Active Triggers -->
+	<object type="Spring.Scheduling.Quartz.SchedulerFactoryObject, Spring.Scheduling.Quartz2">
+		<property name="triggers">
+			<list>
+				<ref object="CxOverwatchJobSimpleTrigger" />
+			</list>
+		</property>
+	</object>
+
+</job-scheduling-data>
+
+

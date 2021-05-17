@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger-->
+<!--Field Name Mandatory	Allowed Values Allowed Special Characters
+Seconds	YES	0-59	, - * /
+Minutes	YES	0-59	, - * /
+Hours	YES	0-23	, - * /
+Day of month	YES	1-31	, - * ? / L W
+Month	YES	1-12 or JAN-DEC	, - * /
+Day of week	YES	1-7 or SUN-SAT	, - * ? / L #
+Year	NO	empty, 1970-2099	, - * /
+
+Expression	Meaning
+0 0 11 ? * SUN Fire saturday at 11 PM
+0 0 12 * * ?	Fire at 12pm (noon) every day
+0 15 10 ? * *	Fire at 10:15am every day
+0 15 10 * * ?	Fire at 10:15am every day
+0 15 10 * * ? *	Fire at 10:15am every day
+0 15 10 * * ? 2005	Fire at 10:15am every day during the year 2005
+0 * 14 * * ?	Fire every minute starting at 2pm and ending at 2:59pm, every day
+0 0/5 14 * * ?	Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day
+0 0/5 14,18 * * ?	Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day
+0 0-5 14 * * ?	Fire every minute starting at 2pm and ending at 2:05pm, every day
+0 10,44 14 ? 3 WED	Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.
+0 15 10 ? * MON-FRI	Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday
+0 15 10 15 * ?	Fire at 10:15am on the 15th day of every month
+0 15 10 L * ?	Fire at 10:15am on the last day of every month
+0 15 10 ? * 6L	Fire at 10:15am on the last Friday of every month
+0 15 10 ? * 6L	Fire at 10:15am on the last Friday of every month
+0 15 10 ? * 6L 2002-2005	Fire at 10:15am on every last friday of every month during the years 2002, 2003, 2004 and 2005
+0 15 10 ? * 6#3	Fire at 10:15am on the third Friday of every month
+0 0 12 1/5 * ?	Fire at 12pm (noon) every 5 days every month, starting on the first day of the month.
+0 11 11 11 11 ?	Fire every November 11th at 11:11am.
+-->
+
+<objects xmlns="http://www.springframework.net">
+
+	<!-- Email Job -->
+	<object name="EmailJob" type="Spring.Scheduling.Quartz.JobDetailObject, Spring.Scheduling.Quartz2">
+		<property name="JobType" value="Klaatu.Jobs.EmailJob, Klaatu.Jobs" />
+		<property name="JobDataAsMap">
+			<dictionary>
+				<entry key="LogOnly" value="false" />
+				<entry key="Message" value="EmailJob Quartz Job" />
+				<entry key="RelativeOutboxDir" value="Outbox" />
+				<entry key="RelativeSentboxDir" value="Sent" />
+				<!-- Email Settings -->
+				<entry key="SmtpServerName" value="smtpservername" />
+				<entry key="SmtpSender" value="notifyemails@place.com" />
+				<entry key="SmtpPort" value="25" />
+				<entry key="SmtpPassword" value="" />
+				<entry key="SmtpUseSsl" value="false" />
+			</dictionary>
+		</property>
+	</object>
+	<!-- Trigger Definitions -->
+	<object id="EmailJobCronTrigger" type="Spring.Scheduling.Quartz.CronTriggerObject, Spring.Scheduling.Quartz2">
+		<property name="jobDetail" ref="EmailJob" />
+		<property name="cronExpressionString" value="0 15 10 14 * ?" />
+	</object>
+	<object id="EmailJobSimpleTrigger" type="Spring.Scheduling.Quartz.SimpleTriggerObject, Spring.Scheduling.Quartz2">
+		<property name="jobDetail" ref="EmailJob" />
+		<property name="startDelay" value="5s" />
+		<property name="repeatInterval" value="300s" />
+	</object>
+
+	<!-- CxHealthCheckJob -->
+	<object name="CxHealthCheckJob" type="Spring.Scheduling.Quartz.JobDetailObject, Spring.Scheduling.Quartz2">
+		<property name="JobType" value="Klaatu.Jobs.CxHealthCheck, Klaatu.Jobs" />
+		<property name="JobDataAsMap">
+			<dictionary>
+				<entry key="LogOnly" value="false" />
+				<entry key="Message" value="CxHealthCheck Quartz Job" />
+				<!-- Credentials for scan -->
+				<entry key="CxApiUsername" value="APIUser" />
+				<entry key="CxApiPassword" value="Base64EncodedPassword" />
+				<!-- Email Settings -->
+				<entry key="NotificationSendDelayMinutes" value="20" />
+				<entry key="EmailSubjectLine" value="ERROR! The Checkmarx PROD System is DOWN!" />
+				<entry key="EmailBody" value="As of {0}, The Checkmarx production system is Down and refusing login attempts.  (So says the CheckmarxAutomater custom service.)" />
+				<entry key="EmailOutbox" value="Outbox" />
+				<!-- Recipient lists should be a semicolon-delimited list of email addresses -->
+				<entry key="RecipientsTo" value="EmailAddresses@somewhere.com" />
+				<entry key="RecipientsCC" value="" />
+				<entry key="RecipientsBCC" value="" />
+			</dictionary>
+		</property>
+	</object>
+	<!-- Trigger Definitions -->
+	<object id="CxHealthCheckJobSimpleTrigger" type="Spring.Scheduling.Quartz.SimpleTriggerObject, Spring.Scheduling.Quartz2">
+		<property name="jobDetail" ref="CxHealthCheckJob" />
+		<property name="startDelay" value="10s" />
+		<property name="repeatInterval" value="300s" />
+	</object>
+
+	
+	<!-- Active Triggers -->
+	<object type="Spring.Scheduling.Quartz.SchedulerFactoryObject, Spring.Scheduling.Quartz2">
+		<property name="triggers">
+			<list>
+				<ref object="CxHealthCheckJobSimpleTrigger" />
+				<ref object="EmailJobSimpleTrigger" />
+			</list>
+		</property>
+	</object>
+
+</objects>
+
+

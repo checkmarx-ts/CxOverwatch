@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "72ZmNLm+OBTdWYZ1xMdCwY+6f7tl2MP9NhNzfj/6acdM1sOPuSNjTz7bugyGuuz1hq9LmMN4toudFotOGk2CPQ==",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\GitHub\\Checkmarx\\CxOverwatch-MyFork\\GortKlaatu.Service\\KlaatuService\\Klaatu.Service\\Klaatu.Service.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\common.logging\\3.4.1\\common.logging.3.4.1.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\common.logging.core\\3.4.1\\common.logging.core.3.4.1.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\common.logging.nlog41\\3.4.1\\common.logging.nlog41.3.4.1.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\nlog\\4.1.2\\nlog.4.1.2.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\quartz\\3.0.7\\quartz.3.0.7.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\quartz.jobs\\3.0.7\\quartz.jobs.3.0.7.nupkg.sha512",
+    "C:\\Users\\Phillip H. Blanton\\.nuget\\packages\\quartz.plugins\\3.0.7\\quartz.plugins.3.0.7.nupkg.sha512"
+  ],
+  "logs": []
+}
