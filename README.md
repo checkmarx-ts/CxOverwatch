@@ -146,6 +146,7 @@ Leave smtp user and password blank for anonymous smtp.
 Follow instructions on creating an incoming webhook for:
 - Slack notifications: https://api.slack.com/messaging/webhooks
 - Teams notifications: https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook
+- Zoom notification: https://zoomappdocs.docs.stoplight.io/incoming-webhook-chatbot
 
 
 ```json
@@ -186,6 +187,12 @@ Follow instructions on creating an incoming webhook for:
                 "systemType": "msteams",
                 "name": "Teams",
                 "hook" : "https://<company>.webhook.office.com/webhookb2/xxxxxxxxxxxxxxxxxxx/IncomingWebhook/xxxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxx"
+            },
+            {
+                "systemType": "zoomchat",
+                "name": "ZoomChat",
+                "hook" : "https://inbots.zoom.us/incoming/hook/xxxxxxxxxxxxxxxx",
+                "auth": "xxxxxxxxxxxxxx"
             }
         ]
     }
