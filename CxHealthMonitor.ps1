@@ -385,12 +385,12 @@ Class WebhooksAlertSystem : AlertSystem {
             $body = @{
                 text = $message
             }
-        # zoomchat
-        if ($this.systemtype -eq 'zoomchat') {
-            $headers = @{ }
-            if ($this.auth) {
-                $headers["Authorization"] = $this.auth
-            }
+            # zoomchat
+            if ($this.systemtype -eq 'zoomchat') {
+                $headers = @{ }
+                if ($this.auth) {
+                    $headers["Authorization"] = $this.auth
+                }
                 $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body['text'] -Headers $headers
             } else {
                 $body = $body | ConvertTo-Json
