@@ -373,7 +373,7 @@ Class WebhooksAlertSystem : AlertSystem {
         $this.systemType = $systemType
         $this.name = $name
         $this.hook = $hook
-	$this.auth = $auth
+        $this.auth = $auth
     }
 
     # Sends a Webhooks with message
@@ -385,17 +385,17 @@ Class WebhooksAlertSystem : AlertSystem {
             $body = @{
                 text = $message
             }
-	    # zoomchat
-	    if ($this.systemtype -eq 'zoomchat') {
-	        $headers = @{ }
-	        if ($this.auth) {
-		    $headers["Authorization"] = $this.auth
-	        }
+        # zoomchat
+        if ($this.systemtype -eq 'zoomchat') {
+            $headers = @{ }
+            if ($this.auth) {
+                $headers["Authorization"] = $this.auth
+            }
                 $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body['text'] -Headers $headers
-	    } else {
-		$body = $body | ConvertTo-Json
-		$response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
-	    }
+            } else {
+                $body = $body | ConvertTo-Json
+                $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
+            }
         }
         catch {
             $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send Webhooks [$($this.systemType)] alert. Verify Webhooks [$($this.systemType)] configuration.")
@@ -1333,7 +1333,7 @@ Class AuditMonitor {
         queryVersion.[Name] As QueryName,
         nodeResults.File_Name AS [File], 
         nodeResults.Line, 
-        nodeResults.Col	AS [Column]
+        nodeResults.Col AS [Column]
         FROM 
         CxDB.dbo.ResultsLabels labels
         INNER JOIN CxDB.dbo.Projects projects ON labels.[ProjectId] = projects.[Id]
