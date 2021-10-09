@@ -157,7 +157,7 @@ Follow instructions on creating an incoming webhook for:
                 "host": "007-myemailserver.com",
                 "port": 587,
                 "sender": "admin@myemailserver.com",
-                "recipients": "list@of.com, email@addresses.com",
+                "recipients": ["list@of.com", "email@addresses.com"],
                 "subject": "Checkmarx Health Monitor Alert",
                 "useSsl": true
             }
