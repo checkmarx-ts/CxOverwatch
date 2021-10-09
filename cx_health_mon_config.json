@@ -31,7 +31,7 @@
                 "host": "smtp.mailserver.com",
                 "port": 587,
                 "sender": "admin@mailserver.com",
-                "recipients": "list@of.com, email@addresses.com",
+                "recipients": ["list@of.com", "email@addresses.com"],
                 "subject": "Checkmarx Health Monitor Alert",
                 "useSsl": true
             }
