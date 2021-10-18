@@ -1038,7 +1038,13 @@ Class EngineMonitor {
         for ($i = 0; $i -lt $script:config.monitor.retries; $i++) {             
             try {
                 if($this.cxVersion.StartsWith("9.3")){
-                    $resp = Invoke-WebRequest -UseBasicParsing -Uri "${apiUri}/swagger/index.html" -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
+                    # fix because on sast engine version 9.3hf16 the url like http://192.168.1.1:8088//swagger/index.html is not working because of the two / before swagger
+                    if($apiUri -match '/$'){
+                        $newApiUri = ("{0}{1}" -f ${apiUri},"swagger/index.html")
+                    }else{
+                        $newApiUri = "${apiUri}/swagger/index.html"
+                    }
+                    $resp = Invoke-WebRequest -UseBasicParsing -Uri $newApiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
                     break
                 } else{
                     $resp = Invoke-WebRequest -UseBasicParsing -Uri $apiUri -TimeoutSec $script:config.monitor.apiResponseTimeoutSeconds
