@@ -365,13 +365,15 @@ Class WebhooksAlertSystem : AlertSystem {
     hidden [String] $systemType
     hidden [String] $name
     hidden [String] $hook
+    hidden [String] $auth
 
     # Constructs the email alert system object
-    WebhooksAlertSystem ([String] $systemType, [String] $name, [String] $hook) {
+    WebhooksAlertSystem ([String] $systemType, [String] $name, [String] $hook, [String] $auth) {
         $this.io = [IO]::new()
         $this.systemType = $systemType
         $this.name = $name
         $this.hook = $hook
+        $this.auth = $auth
     }
 
     # Sends a Webhooks with message
@@ -383,8 +385,17 @@ Class WebhooksAlertSystem : AlertSystem {
             $body = @{
                 text = $message
             }
-            $body = $body | ConvertTo-Json
-            $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
+            # zoomchat
+            if ($this.systemtype -eq 'zoomchat') {
+                $headers = @{ }
+                if ($this.auth) {
+                    $headers["Authorization"] = $this.auth
+                }
+                $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body['text'] -Headers $headers
+            } else {
+                $body = $body | ConvertTo-Json
+                $response = Invoke-RestMethod -Uri $this.hook -Method Post -Body $body -ContentType 'application/json'
+            }
         }
         catch {
             $this.io.Log("ERROR: [$($_.Exception.Message)] Could not send Webhooks [$($this.systemType)] alert. Verify Webhooks [$($this.systemType)] configuration.")
@@ -467,10 +478,10 @@ Class AlertService {
                     $this.AddAlertSystem($syslogAlertSystem);
                 }
             }
-            # Register webhooks, if configured
+            # WebhooksAlertSystem if configured
             if ($alertingSystem.webhooks) {
                 foreach ($webhookSystem in $alertingSystem.webhooks) {
-                    [AlertSystem] $webhookAlertSystem = [WebhooksAlertSystem]::new($webhookSystem.systemType, $webhookSystem.name, $webhookSystem.hook)
+                    [AlertSystem] $webhookAlertSystem = [WebhooksAlertSystem]::new($webhookSystem.systemType, $webhookSystem.name, $webhookSystem.hook, $webhookSystem.auth)
                     $this.AddAlertSystem($webhookAlertSystem);
                 }
             }
@@ -1322,7 +1333,7 @@ Class AuditMonitor {
         queryVersion.[Name] As QueryName,
         nodeResults.File_Name AS [File], 
         nodeResults.Line, 
-        nodeResults.Col	AS [Column]
+        nodeResults.Col AS [Column]
         FROM 
         CxDB.dbo.ResultsLabels labels
         INNER JOIN CxDB.dbo.Projects projects ON labels.[ProjectId] = projects.[Id]
